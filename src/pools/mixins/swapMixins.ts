@@ -34,10 +34,10 @@ async function _swapCheck(
     return [i, j, _amount]
 }
 
-async function _swapMinAmount(this: PoolTemplate, i: number, j: number, _amount: bigint, slippage = 0.5): Promise<bigint> {
+async function _swapMinAmount(this: PoolTemplate, i: number, j: number, _amount: bigint, slippage = 0.5, curveObj = curve): Promise<bigint> {
     // @ts-ignore
     const _expected: bigint = await this._swapExpected(i, j, _amount);
-    const [outputCoinDecimals] = _getCoinDecimals(this.underlyingCoinAddresses[j]);
+    const [outputCoinDecimals] = _getCoinDecimals(curveObj, this.underlyingCoinAddresses[j]);
     const minAmountBN: BigNumber = toBN(_expected, outputCoinDecimals).times(100 - slippage).div(100);
 
     return fromBN(minAmountBN, outputCoinDecimals);

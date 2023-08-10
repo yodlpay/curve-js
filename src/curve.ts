@@ -285,7 +285,7 @@ export const NETWORK_CONSTANTS: { [index: number]: any } = {
     },
 }
 
-class Curve implements ICurve {
+export class Curve implements ICurve {
     provider: ethers.BrowserProvider | ethers.JsonRpcProvider;
     multicallProvider: MulticallProvider;
     signer: ethers.Signer | null;

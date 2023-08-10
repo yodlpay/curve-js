@@ -17,8 +17,8 @@ import { swapTricrypto2Mixin, swapMetaFactoryMixin, swapCryptoMetaFactoryMixin, 
 import { swapWrappedExpectedAndApproveMixin, swapWrappedTricrypto2Mixin, swapWrappedMixin } from "./mixins/swapWrappedMixins.js";
 
 
-export const getPool = (poolId: string): PoolTemplate => {
-    const poolDummy = new PoolTemplate(poolId);
+export const getPool = (poolId: string, curveObj = curve): PoolTemplate => {
+    const poolDummy = new PoolTemplate(poolId, curveObj);
     class Pool extends PoolTemplate {}
 
     // statsBalances
@@ -170,10 +170,10 @@ export const getPool = (poolId: string): PoolTemplate => {
     }
 
     // swap and swapEstimateGas
-    if ('exchange(uint256,uint256,uint256,uint256,bool)' in curve.contracts[poolDummy.address].contract &&
+    if ('exchange(uint256,uint256,uint256,uint256,bool)' in curveObj.contracts[poolDummy.address].contract &&
         !(curve.chainId === 100 && poolDummy.id === "tricrypto")) { // tricrypto2 (eth), tricrypto (arbitrum), avaxcrypto (avalanche); 100 is xDAI
         Object.assign(Pool.prototype, swapTricrypto2Mixin);
-    } else if (poolDummy.isMetaFactory && (getPool(poolDummy.basePool).isLending || getPool(poolDummy.basePool).isFake || poolDummy.isCrypto)) {
+    } else if (poolDummy.isMetaFactory && (getPool(poolDummy.basePool, curveObj).isLending || getPool(poolDummy.basePool, curveObj).isFake || poolDummy.isCrypto)) {
         if (poolDummy.isCrypto) {
             Object.assign(Pool.prototype, swapCryptoMetaFactoryMixin);
         } else {
@@ -186,12 +186,12 @@ export const getPool = (poolId: string): PoolTemplate => {
     // swapWrapped and swapWrappedEstimateGas
     if (!poolDummy.isPlain && !poolDummy.isFake) {
         Object.assign(Pool.prototype, swapWrappedExpectedAndApproveMixin);
-        if ('exchange(uint256,uint256,uint256,uint256,bool)' in curve.contracts[poolDummy.address].contract) { // tricrypto2 (eth), tricrypto (arbitrum)
+        if ('exchange(uint256,uint256,uint256,uint256,bool)' in curveObj.contracts[poolDummy.address].contract) { // tricrypto2 (eth), tricrypto (arbitrum)
             Object.assign(Pool.prototype, swapWrappedTricrypto2Mixin);
         } else {
             Object.assign(Pool.prototype, swapWrappedMixin);
         }
     }
 
-    return new Pool(poolId);
+    return new Pool(poolId, curveObj);
 }
