@@ -619,10 +619,7 @@ export const swapExpected = async (inputCoin: string, outputCoin: string, amount
     return (await getBestRouteAndOutput(inputCoin, outputCoin, amount, curveObj))['output'];
 }
 
-export const swapPriceImpact = async (inputCoin: string, outputCoin: string, amount: number | string, curveObj = curve): Promise<number> => {
-    const [inputCoinAddress, outputCoinAddress] = _getCoinAddresses(curveObj, inputCoin, outputCoin);
-    const [inputCoinDecimals, outputCoinDecimals] = _getCoinDecimals(curveObj, inputCoinAddress, outputCoinAddress);
-    const { route, output } = await getBestRouteAndOutput(inputCoinAddress, outputCoinAddress, amount, curveObj);
+export const swapPriceImpactFromRoute = async (amount: number | string, route: IRoute, output: string, inputCoinDecimals: number, outputCoinDecimals: number, curveObj = curve): Promise<number> => {
     const _amount = parseUnits(amount, inputCoinDecimals);
     const _output = parseUnits(output, outputCoinDecimals);
 
@@ -632,7 +629,7 @@ export const swapPriceImpact = async (inputCoin: string, outputCoin: string, amo
 
     const contract = curveObj.contracts[curveObj.constants.ALIASES.registry_exchange].contract;
     let _smallAmount = fromBN(smallAmountIntBN.div(10 ** inputCoinDecimals), inputCoinDecimals);
-    const { _route, _swapParams, _factorySwapAddresses } = _getExchangeMultipleArgs(route);
+    const { _route, _swapParams, _factorySwapAddresses } = _getExchangeMultipleArgs(route, curveObj);
     let _smallOutput: bigint;
     try {
         _smallOutput = await contract.get_exchange_multiple_amount(_route, _swapParams, _smallAmount, _factorySwapAddresses, curveObj.constantOptions);
@@ -643,6 +640,13 @@ export const swapPriceImpact = async (inputCoin: string, outputCoin: string, amo
     const priceImpactBN = _get_price_impact(_amount, _output, _smallAmount, _smallOutput, inputCoinDecimals, outputCoinDecimals);
 
     return Number(_cutZeros(priceImpactBN.toFixed(4)))
+}
+
+export const swapPriceImpact = async (inputCoin: string, outputCoin: string, amount: number | string, curveObj = curve): Promise<number> => {
+    const [inputCoinAddress, outputCoinAddress] = _getCoinAddresses(curveObj, inputCoin, outputCoin);
+    const [inputCoinDecimals, outputCoinDecimals] = _getCoinDecimals(curveObj, inputCoinAddress, outputCoinAddress);
+    const { route, output } = await getBestRouteAndOutput(inputCoinAddress, outputCoinAddress, amount, curveObj);
+    return await swapPriceImpactFromRoute(amount, route, output, inputCoinDecimals, outputCoinDecimals, curveObj);
 }
 
 export const swapIsApproved = async (inputCoin: string, amount: number | string): Promise<boolean> => {
