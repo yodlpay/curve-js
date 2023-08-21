@@ -10,6 +10,7 @@ export declare const implementationABIDictMoonbeam: IDict<any>;
 export declare const implementationABIDictKava: IDict<any>;
 export declare const implementationABIDictCelo: IDict<any>;
 export declare const implementationABIDictZkSync: IDict<any>;
+export declare const implementationABIDictBase: IDict<any>;
 export declare const implementationBasePoolIdDictEthereum: IDict<string>;
 export declare const implementationBasePoolIdDictPolygon: IDict<string>;
 export declare const implementationBasePoolIdDictFantom: IDict<string>;
@@ -21,6 +22,7 @@ export declare const implementationBasePoolIdDictMoonbeam: IDict<string>;
 export declare const implementationBasePoolIdDictKava: IDict<string>;
 export declare const implementationBasePoolIdDictCelo: IDict<string>;
 export declare const implementationBasePoolIdDictZkSync: IDict<string>;
+export declare const implementationBasePoolIdDictBase: IDict<string>;
 export declare const basePoolIdZapDictEthereum: IDict<{
     address: string;
     ABI: any;
@@ -62,6 +64,10 @@ export declare const basePoolIdZapDictCelo: IDict<{
     ABI: any;
 }>;
 export declare const basePoolIdZapDictZkSync: IDict<{
+    address: string;
+    ABI: any;
+}>;
+export declare const basePoolIdZapDictBase: IDict<{
     address: string;
     ABI: any;
 }>;

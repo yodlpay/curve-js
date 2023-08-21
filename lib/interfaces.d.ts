@@ -3,8 +3,8 @@ import { Contract as MulticallContract, Provider as MulticallProvider } from "et
 export interface IDict<T> {
     [index: string]: T;
 }
-export type INetworkName = "ethereum" | "optimism" | "xdai" | "polygon" | "fantom" | "zksync" | "moonbeam" | "kava" | "arbitrum" | "celo" | "avalanche" | "aurora";
-export type IChainId = 1 | 10 | 100 | 137 | 250 | 324 | 1284 | 2222 | 42161 | 42220 | 43114 | 1313161554;
+export type INetworkName = "ethereum" | "optimism" | "xdai" | "polygon" | "fantom" | "zksync" | "moonbeam" | "kava" | "base" | "arbitrum" | "celo" | "avalanche" | "aurora";
+export type IChainId = 1 | 10 | 100 | 137 | 250 | 324 | 1284 | 2222 | 8453 | 42161 | 42220 | 43114 | 1313161554;
 export type IFactoryPoolType = "factory" | "factory-crvusd" | "factory-eywa" | "factory-crypto" | "factory-tricrypto";
 export type IPoolType = "main" | "crypto" | IFactoryPoolType;
 export type REFERENCE_ASSET = 'USD' | 'EUR' | 'BTC' | 'ETH' | 'LINK' | 'CRYPTO' | 'OTHER';

@@ -10,6 +10,7 @@ export declare const lpTokenBasePoolIdDictMoonbeam: IDict<string>;
 export declare const lpTokenBasePoolIdDictKava: IDict<string>;
 export declare const lpTokenBasePoolIdDictCelo: IDict<string>;
 export declare const lpTokenBasePoolIdDictZkSync: IDict<string>;
+export declare const lpTokenBasePoolIdDictBase: IDict<string>;
 export declare const basePoolIdZapDictEthereum: IDict<{
     address: string;
     ABI: any;
@@ -51,6 +52,10 @@ export declare const basePoolIdZapDictCelo: IDict<{
     ABI: any;
 }>;
 export declare const basePoolIdZapDictZkSync: IDict<{
+    address: string;
+    ABI: any;
+}>;
+export declare const basePoolIdZapDictBase: IDict<{
     address: string;
     ABI: any;
 }>;

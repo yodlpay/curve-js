@@ -188,6 +188,7 @@ declare const router: {
     getOutputForRoute: ((route: import("./interfaces.js").IRoute, _amount: bigint, curveObj?: any) => Promise<bigint>) & import("memoizee").Memoized<(route: import("./interfaces.js").IRoute, _amount: bigint, curveObj?: any) => Promise<bigint>>;
     expected: (inputCoin: string, outputCoin: string, amount: string | number, curveObj?: Curve) => Promise<string>;
     priceImpact: (inputCoin: string, outputCoin: string, amount: string | number, curveObj?: Curve) => Promise<number>;
+    priceImpactFromRoute: (amount: string | number, route: import("./interfaces.js").IRoute, output: string, inputCoinDecimals: number, outputCoinDecimals: number, curveObj?: Curve) => Promise<number>;
     isApproved: (inputCoin: string, amount: string | number) => Promise<boolean>;
     approve: (inputCoin: string, amount: string | number) => Promise<string[]>;
     swap: (inputCoin: string, outputCoin: string, amount: string | number, slippage?: number, curveObj?: Curve) => Promise<ethers.ContractTransactionResponse>;

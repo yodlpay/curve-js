@@ -9,6 +9,7 @@ export declare const getBestRouteAndOutput: (inputCoin: string, outputCoin: stri
     output: string;
 }>;
 export declare const swapExpected: (inputCoin: string, outputCoin: string, amount: number | string, curveObj?: import("./curve.js").Curve) => Promise<string>;
+export declare const swapPriceImpactFromRoute: (amount: number | string, route: IRoute, output: string, inputCoinDecimals: number, outputCoinDecimals: number, curveObj?: import("./curve.js").Curve) => Promise<number>;
 export declare const swapPriceImpact: (inputCoin: string, outputCoin: string, amount: number | string, curveObj?: import("./curve.js").Curve) => Promise<number>;
 export declare const swapIsApproved: (inputCoin: string, amount: number | string) => Promise<boolean>;
 export declare const swapApproveEstimateGas: (inputCoin: string, amount: number | string) => Promise<number>;
