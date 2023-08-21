@@ -619,7 +619,9 @@ export const swapExpected = async (inputCoin: string, outputCoin: string, amount
     return (await getBestRouteAndOutput(inputCoin, outputCoin, amount, curveObj))['output'];
 }
 
-export const swapPriceImpactFromRoute = async (amount: number | string, route: IRoute, output: string, inputCoinDecimals: number, outputCoinDecimals: number, curveObj = curve): Promise<number> => {
+export const swapPriceImpactFromRoute = async (amount: number | string, route: IRoute, output: string, inputCoin: string, outputCoin: string, curveObj = curve): Promise<number> => {
+    const [inputCoinAddress, outputCoinAddress] = _getCoinAddresses(curveObj, inputCoin, outputCoin);
+    const [inputCoinDecimals, outputCoinDecimals] = _getCoinDecimals(curveObj, inputCoinAddress, outputCoinAddress);
     const _amount = parseUnits(amount, inputCoinDecimals);
     const _output = parseUnits(output, outputCoinDecimals);
 
@@ -644,9 +646,8 @@ export const swapPriceImpactFromRoute = async (amount: number | string, route: I
 
 export const swapPriceImpact = async (inputCoin: string, outputCoin: string, amount: number | string, curveObj = curve): Promise<number> => {
     const [inputCoinAddress, outputCoinAddress] = _getCoinAddresses(curveObj, inputCoin, outputCoin);
-    const [inputCoinDecimals, outputCoinDecimals] = _getCoinDecimals(curveObj, inputCoinAddress, outputCoinAddress);
     const { route, output } = await getBestRouteAndOutput(inputCoinAddress, outputCoinAddress, amount, curveObj);
-    return await swapPriceImpactFromRoute(amount, route, output, inputCoinDecimals, outputCoinDecimals, curveObj);
+    return await swapPriceImpactFromRoute(amount, route, output, inputCoin, outputCoin, curveObj);
 }
 
 export const swapIsApproved = async (inputCoin: string, amount: number | string): Promise<boolean> => {
