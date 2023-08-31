@@ -561,9 +561,9 @@ export const getBestRoute = memoize(
 
         const [gasAmounts, outputCoinUsdRate, gasData, ethUsdRate] = await Promise.all([
             _estimateGasForDifferentRoutes(routes.map((r) => r.route), inputCoinAddress, outputCoinAddress, _amount, curveObj),
-            _getUsdRate(outputCoinAddress),
+            _getUsdRate(outputCoinAddress, curveObj),
             axios.get("https://api.curve.fi/api/getGas"),
-            _getUsdRate(ETH_ADDRESS),
+            _getUsdRate(ETH_ADDRESS, curveObj),
         ]);
         const gasPrice = gasData.data.data.gas.standard;
         const expectedAmounts = (routes).map(
