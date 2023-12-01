@@ -1,8 +1,8 @@
-import {ICurve, IPoolDataFromApi, IPoolDataShort} from "../interfaces";
+import { ICurve, IPoolDataShort } from "../interfaces";
 import { FACTORY_CONSTANTS } from "./constants.js";
 import { CRYPTO_FACTORY_CONSTANTS } from "./constants-crypto.js";
 import { getPoolIdBySwapAddress } from "../utils.js";
-import {curve} from "../curve";
+import type { Curve } from "../curve";
 
 export function setFactoryZapContracts(this: ICurve, isCrypto: boolean): void {
     const basePoolIdZapDict = (isCrypto ? CRYPTO_FACTORY_CONSTANTS : FACTORY_CONSTANTS)[this.chainId].basePoolIdZapDict;
@@ -16,7 +16,7 @@ export function setFactoryZapContracts(this: ICurve, isCrypto: boolean): void {
     }
 }
 
-export function getPoolIdByAddress(poolList: IPoolDataShort[] , address: string, curveObj = curve): string {
+export function getPoolIdByAddress(poolList: IPoolDataShort[] , address: string, curveObj: Curve): string {
     const pool = poolList.find((item) => item.address.toLowerCase() === address.toLowerCase())
     if(pool) {
         return pool.id;
