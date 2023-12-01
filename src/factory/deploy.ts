@@ -171,12 +171,12 @@ export const deployStableMetaPool = async (
     return await _deployStableMetaPool(basePool, name, symbol, coin, A, fee, implementationIdx, false) as ethers.ContractTransactionResponse;
 }
 
-export const getDeployedStableMetaPoolAddress = async (tx: ethers.ContractTransactionResponse): Promise<string> => {
+export const getDeployedStableMetaPoolAddress = async (tx: ethers.ContractTransactionResponse, curveObj = curve): Promise<string> => {
     const txInfo = await tx.wait();
     if (!txInfo) throw Error("Can't get tx info");
     for (let i = txInfo.logs.length - 1; i > -1; i--) {
         if ("args" in txInfo.logs[i]) {
-            const basePoolId = getPoolIdBySwapAddress((txInfo.logs[i] as ethers.EventLog).args[1]);
+            const basePoolId = getPoolIdBySwapAddress((txInfo.logs[i] as ethers.EventLog).args[1], curveObj);
             const basePool = getPool(basePoolId);
             return txInfo.logs[basePool.underlyingCoins.length].address.toLowerCase();
         }

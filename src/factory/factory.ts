@@ -1,5 +1,5 @@
 import { Contract as MulticallContract } from "ethcall";
-import { curve } from "../curve.js";
+import {Curve, curve } from "../curve.js";
 import {IDict, IPoolData, ICurve, REFERENCE_ASSET, IPoolDataShort} from "../interfaces";
 import ERC20ABI from "../constants/abis/ERC20.json" assert { type: 'json' };
 import factoryGaugeABI from "../constants/abis/gauge_factory.json" assert { type: 'json' };
@@ -39,7 +39,7 @@ export async function getBasePoolIds(this: ICurve, factoryAddress: string, rawSw
 
     result.forEach((item: string) => {
         if(item !== '0x0000000000000000000000000000000000000000') {
-            basePoolIds.push(getPoolIdByAddress(tmpPools, item));
+            basePoolIds.push(getPoolIdByAddress(tmpPools, item, this as Curve));
         } else {
             basePoolIds.push('')
         }

@@ -269,8 +269,8 @@ export const ensureAllowance = async (coins: string[], amounts: (number | string
     return await _ensureAllowance(coinAddresses, _amounts, spender, isMax, curveObj)
 }
 
-export const getPoolIdBySwapAddress = (swapAddress: string): string => {
-    const poolsData = curve.getPoolsData();
+export const getPoolIdBySwapAddress = (swapAddress: string, curveObj = curve): string => {
+    const poolsData = curveObj.getPoolsData();
     return Object.entries(poolsData).filter(([_, poolData]) => poolData.swap_address.toLowerCase() === swapAddress.toLowerCase())[0][0];
 }
 

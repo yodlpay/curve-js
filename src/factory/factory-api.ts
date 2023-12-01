@@ -1,4 +1,4 @@
-import { curve } from "../curve.js";
+import {Curve, curve} from "../curve.js";
 import { IDict, IFactoryPoolType, IPoolData, ICurve, IPoolDataFromApi } from "../interfaces";
 import factoryGaugeABI from "../constants/abis/gauge_factory.json" assert { type: 'json' };
 import gaugeChildABI from "../constants/abis/gauge_child.json" assert { type: 'json' };
@@ -162,7 +162,7 @@ export async function getFactoryPoolsDataFromApi(this: ICurve, factoryType: IFac
         } else if (pool.isMetaPool) {
             const implementationABIDict = FACTORY_CONSTANTS[this.chainId].implementationABIDict;
             const allPoolsData = {...this.constants.POOLS_DATA, ...FACTORY_POOLS_DATA};
-            const basePoolId = getPoolIdByAddress(rawPoolList, pool.basePoolAddress as string);
+            const basePoolId = getPoolIdByAddress(rawPoolList, pool.basePoolAddress as string, this as Curve);
 
             const basePoolCoinNames = allPoolsData[basePoolId]?.underlying_coins;
             const basePoolCoinAddresses = allPoolsData[basePoolId]?.underlying_coin_addresses;
