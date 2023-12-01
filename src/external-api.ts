@@ -24,6 +24,7 @@ export const _getAllPoolsFromApi = async (network: INetworkName): Promise<IExten
         _getPoolsFromApi(network, "factory-eywa"),
         _getPoolsFromApi(network, "factory-crypto"),
         _getPoolsFromApi(network, "factory-tricrypto"),
+        _getPoolsFromApi(network, "factory-stable-ng"),
     ]);
 }
 
@@ -47,7 +48,7 @@ export const _getSubgraphData = memoize(
 // Moonbeam and Aurora only
 export const _getLegacyAPYsAndVolumes = memoize(
     async (network: string): Promise<IDict<{ apy: { day: number, week: number }, volume: number }>> => {
-        if (["kava", "celo", "zksync", "base"].includes(network)) return {}; // Exclude Kava, Celo, ZkSync and Base
+        if (["kava", "celo", "zksync", "base", "bsc"].includes(network)) return {}; // Exclude Kava, Celo, ZkSync, Base and Bsc
         const url = "https://api.curve.fi/api/getMainPoolsAPYs/" + network;
         const data = (await axios.get(url, { validateStatus: () => true })).data;
         const result: IDict<{ apy: { day: number, week: number }, volume: number }> = {};
@@ -66,7 +67,7 @@ export const _getLegacyAPYsAndVolumes = memoize(
     }
 )
 
-// Base, ZkSync, Moonbeam, Kava and Celo only
+// Base, Bsc, ZkSync, Moonbeam, Kava and Celo only
 export const _getFactoryAPYsAndVolumes = memoize(
     async (network: string): Promise<{ poolAddress: string, apy: number, volume: number }[]> => {
         if (network === "aurora") return [];  // Exclude Aurora
@@ -83,7 +84,7 @@ export const _getFactoryAPYsAndVolumes = memoize(
 )
 
 export const _getAllGauges = memoize(
-    async (): Promise<IDict<{ gauge: string, is_killed?: boolean }>> => {
+    async (): Promise<IDict<{ gauge: string, is_killed?: boolean, gaugeStatus?: Record<string, boolean> | null }>> => {
         const url = `https://api.curve.fi/api/getAllGauges`;
         const response = await axios.get(url, { validateStatus: () => true });
 

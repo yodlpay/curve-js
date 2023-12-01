@@ -2,10 +2,11 @@ import axios from 'axios';
 import { Contract } from 'ethers';
 import { Contract as MulticallContract } from "ethcall";
 import BigNumber from 'bignumber.js';
-import { IChainId, IDict, INetworkName, IRewardFromApi } from './interfaces';
+import {IChainId, IDict, INetworkName, IRewardFromApi, REFERENCE_ASSET} from './interfaces';
 import { curve, NETWORK_CONSTANTS } from "./curve.js";
 import { _getFactoryAPYsAndVolumes, _getLegacyAPYsAndVolumes, _getAllPoolsFromApi, _getSubgraphData } from "./external-api.js";
 import ERC20Abi from './constants/abis/ERC20.json' assert { type: 'json' };
+import { L2Networks } from './constants/L2Networks.js';
 
 
 export const ETH_ADDRESS = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
@@ -58,6 +59,40 @@ export const fromBN = (bn: BigNumber, decimals = 18): bigint => {
 export const isEth = (address: string): boolean => address.toLowerCase() === ETH_ADDRESS.toLowerCase();
 export const getEthIndex = (addresses: string[]): number => addresses.map((address: string) => address.toLowerCase()).indexOf(ETH_ADDRESS.toLowerCase());
 export const mulBy1_3 = (n: bigint): bigint => n * curve.parseUnits("130", 0) / curve.parseUnits("100", 0);
+
+export const smartNumber = (abstractNumber: bigint | bigint[]): number | number[] => {
+    if(Array.isArray(abstractNumber)) {
+        return [Number(abstractNumber[0]), Number(abstractNumber[1])];
+    } else {
+        return Number(abstractNumber);
+    }
+}
+
+export const DIGas = (gas: bigint | Array<bigint>): bigint => {
+    if(Array.isArray(gas)) {
+        return gas[0];
+    } else {
+        return gas;
+    }
+}
+
+export const getGasFromArray = (gas: number[]): number | number[] => {
+    if(gas[1] === 0) {
+        return gas[0];
+    } else {
+        return gas;
+    }
+}
+
+export const gasSum = (gas: number[], currentGas: number | number[]): number[] => {
+    if(Array.isArray(currentGas)) {
+        gas[0] = gas[0] + currentGas[0];
+        gas[1] = gas[1] + currentGas[1];
+    } else {
+        gas[0] = gas[0] + currentGas;
+    }
+    return gas;
+}
 
 // coins can be either addresses or symbols
 export const _getCoinAddressesNoCheck = (curveObj = curve, ...coins: string[] | string[][]): string[] => {
@@ -189,10 +224,10 @@ export const _ensureAllowance = async (coins: string[], amounts: bigint[], spend
             const _approveAmount = isMax ? MAX_ALLOWANCE : amounts[i];
             await curveObj.updateFeeData();
             if (allowance[i] > curveObj.parseUnits("0")) {
-                const gasLimit = mulBy1_3(await contract.approve.estimateGas(spender, curveObj.parseUnits("0"), curveObj.constantOptions));
+                const gasLimit = mulBy1_3(DIGas(await contract.approve.estimateGas(spender, curveObj.parseUnits("0"), curveObj.constantOptions)));
                 txHashes.push((await contract.approve(spender, curveObj.parseUnits("0"), { ...curveObj.options, gasLimit })).hash);
             }
-            const gasLimit = mulBy1_3(await contract.approve.estimateGas(spender, _approveAmount, curveObj.constantOptions));
+            const gasLimit = mulBy1_3(DIGas(await contract.approve.estimateGas(spender, _approveAmount, curveObj.constantOptions)));
             txHashes.push((await contract.approve(spender, _approveAmount, { ...curveObj.options, gasLimit })).hash);
         }
     }
@@ -201,26 +236,28 @@ export const _ensureAllowance = async (coins: string[], amounts: bigint[], spend
 }
 
 // coins can be either addresses or symbols
-export const ensureAllowanceEstimateGas = async (coins: string[], amounts: (number | string)[], spender: string, isMax = true, curveObj = curve): Promise<number> => {
+export const ensureAllowanceEstimateGas = async (coins: string[], amounts: (number | string)[], spender: string, isMax = true, curveObj = curve): Promise<number | number[]> => {
     const coinAddresses = _getCoinAddresses(curveObj, coins);
     const decimals = _getCoinDecimals(curveObj, coinAddresses);
     const _amounts = amounts.map((a, i) => parseUnits(a, decimals[i]));
     const address = curveObj.signerAddress;
     const allowance: bigint[] = await _getAllowance(coinAddresses, address, spender, curveObj);
 
-    let gas = 0;
+    let gas = [0,0];
     for (let i = 0; i < allowance.length; i++) {
         if (allowance[i] < _amounts[i]) {
             const contract = curveObj.contracts[coinAddresses[i]].contract;
             const _approveAmount = isMax ? MAX_ALLOWANCE : _amounts[i];
             if (allowance[i] > curveObj.parseUnits("0")) {
-                gas += Number(await contract.approve.estimateGas(spender, curveObj.parseUnits("0"), curveObj.constantOptions));
+                const currentGas = smartNumber(await contract.approve.estimateGas(spender, curveObj.parseUnits("0"), curveObj.constantOptions));
+                gas = gasSum(gas, currentGas);
             }
-            gas += Number(await contract.approve.estimateGas(spender, _approveAmount, curveObj.constantOptions));
+            const currentGas = smartNumber(await contract.approve.estimateGas(spender, _approveAmount, curveObj.constantOptions));
+            gas = gasSum(gas, currentGas);
         }
     }
 
-    return gas
+    return getGasFromArray(gas);
 }
 
 // coins can be either addresses or symbols
@@ -247,25 +284,79 @@ const _getTokenAddressBySwapAddress = (swapAddress: string): string => {
 export const _getUsdPricesFromApi = async (): Promise<IDict<number>> => {
     const network = curve.constants.NETWORK_NAME;
     const allTypesExtendedPoolData = await _getAllPoolsFromApi(network);
-    const priceDict: IDict<number> = {};
+    const priceDict: IDict<Record<string, number>[]> = {};
+    const priceDictByMaxTvl: IDict<number> = {};
 
     for (const extendedPoolData of allTypesExtendedPoolData) {
         for (const pool of extendedPoolData.poolData) {
             const lpTokenAddress = pool.lpTokenAddress ?? pool.address;
             const totalSupply = pool.totalSupply / (10 ** 18);
-            priceDict[lpTokenAddress.toLowerCase()] = pool.usdTotal && totalSupply ? pool.usdTotal / totalSupply : 0;
+            if(lpTokenAddress.toLowerCase() in priceDict) {
+                priceDict[lpTokenAddress.toLowerCase()].push({
+                    price: pool.usdTotal && totalSupply ? pool.usdTotal / totalSupply : 0,
+                    tvl: pool.usdTotal,
+                })
+            } else {
+                priceDict[lpTokenAddress.toLowerCase()] = []
+                priceDict[lpTokenAddress.toLowerCase()].push({
+                    price: pool.usdTotal && totalSupply ? pool.usdTotal / totalSupply : 0,
+                    tvl: pool.usdTotal,
+                })
+            }
 
             for (const coin of pool.coins) {
-                if (typeof coin.usdPrice === "number") priceDict[coin.address.toLowerCase()] = coin.usdPrice;
+                if (typeof coin.usdPrice === "number") {
+                    if(coin.address.toLowerCase() in priceDict) {
+                        priceDict[coin.address.toLowerCase()].push({
+                            price: coin.usdPrice,
+                            tvl: pool.usdTotal,
+                        })
+                    } else {
+                        priceDict[coin.address.toLowerCase()] = []
+                        priceDict[coin.address.toLowerCase()].push({
+                            price: coin.usdPrice,
+                            tvl: pool.usdTotal,
+                        })
+                    }
+                }
             }
 
             for (const coin of pool.gaugeRewards ?? []) {
-                if (typeof coin.tokenPrice === "number") priceDict[coin.tokenAddress.toLowerCase()] = coin.tokenPrice;
+                if (typeof coin.tokenPrice === "number") {
+                    if(coin.tokenAddress.toLowerCase() in priceDict) {
+                        priceDict[coin.tokenAddress.toLowerCase()].push({
+                            price: coin.tokenPrice,
+                            tvl: pool.usdTotal,
+                        });
+                    } else {
+                        priceDict[coin.tokenAddress.toLowerCase()] = []
+                        priceDict[coin.tokenAddress.toLowerCase()].push({
+                            price: coin.tokenPrice,
+                            tvl: pool.usdTotal,
+                        });
+                    }
+                }
             }
         }
     }
 
-    return priceDict
+    for(const address in priceDict) {
+        if(priceDict[address].length > 0) {
+            const maxTvlItem = priceDict[address].reduce((prev, current) => {
+                if (+current.tvl > +prev.tvl) {
+                    return current;
+                } else {
+                    return prev;
+                }
+            });
+            priceDictByMaxTvl[address] = maxTvlItem.price
+        } else {
+            priceDictByMaxTvl[address] = 0
+        }
+
+    }
+
+    return priceDictByMaxTvl
 }
 
 export const _getCrvApyFromApi = async (): Promise<IDict<[number, number]>> => {
@@ -296,7 +387,8 @@ export const _getRewardsFromApi = async (): Promise<IDict<IRewardFromApi[]>> => 
     for (const extendedPoolData of allTypesExtendedPoolData) {
         for (const pool of extendedPoolData.poolData) {
             if (pool.gaugeAddress) {
-                rewardsDict[pool.gaugeAddress.toLowerCase()] = pool.gaugeRewards;
+                rewardsDict[pool.gaugeAddress.toLowerCase()] = (pool.gaugeRewards ?? [])
+                    .filter((r) => curve.chainId === 1 || r.tokenAddress.toLowerCase() !== curve.constants.COINS.crv);
             }
         }
     }
@@ -315,6 +407,7 @@ export const _getUsdRate = async (assetId: string, curveObj = curve): Promise<nu
     let chainName = {
         1: 'ethereum',
         10: 'optimistic-ethereum',
+        56: "binance-smart-chain",
         100: 'xdai',
         137: 'polygon-pos',
         250: 'fantom',
@@ -331,6 +424,7 @@ export const _getUsdRate = async (assetId: string, curveObj = curve): Promise<nu
     const nativeTokenName = {
         1: 'ethereum',
         10: 'ethereum',
+        56: 'bnb',
         100: 'xdai',
         137: 'matic-network',
         250: 'fantom',
@@ -388,6 +482,32 @@ export const getUsdRate = async (curveObj = curve, coin: string): Promise<number
     return await _getUsdRate(coinAddress, curveObj);
 }
 
+export const getGasPriceFromL1 = async (): Promise<number> => {
+    if(L2Networks.includes(curve.chainId)) {
+        const gasPrice = await curve.contracts[curve.constants.ALIASES.gas_oracle].contract.l1BaseFee();
+        return Number(gasPrice) + 1e9; // + 1 gwei
+    } else {
+        throw Error("This method exists only for L2 networks");
+    }
+}
+
+export const getGasPriceFromL2 = async (): Promise<number> => {
+    if(L2Networks.includes(curve.chainId)) {
+        const gasPrice = await curve.contracts[curve.constants.ALIASES.gas_oracle].contract.gasPrice();
+        return Number(gasPrice);
+    } else {
+        throw Error("This method exists only for L2 networks");
+    }
+}
+
+export const getTxCostsUsd = (ethUsdRate: number, gasPrice: number, gas: number | number[], gasPriceL1 = 0): number => {
+    if(Array.isArray(gas)) {
+        return ethUsdRate * ((gas[0] * gasPrice / 1e18) + (gas[1] * gasPriceL1 / 1e18));
+    } else {
+        return ethUsdRate * gas * gasPrice / 1e18;
+    }
+}
+
 const _getNetworkName = (network: INetworkName | IChainId = curve.chainId): INetworkName => {
     if (typeof network === "number" && NETWORK_CONSTANTS[network]) {
         return NETWORK_CONSTANTS[network].NAME;
@@ -418,9 +538,9 @@ export const getTVL = async (network: INetworkName | IChainId = curve.chainId): 
 
 export const getVolume = async (network: INetworkName | IChainId = curve.chainId): Promise<{ totalVolume: number, cryptoVolume: number, cryptoShare: number }> => {
     network = _getNetworkName(network);
-    if (["zksync", "moonbeam", "kava", "base", "celo", "aurora"].includes(network)) {
+    if (["zksync", "moonbeam", "kava", "base", "celo", "aurora", "bsc"].includes(network)) {
         const chainId = _getChainId(network);
-        if (curve.chainId !== chainId) throw Error("To get volume for ZkSync, Moonbeam, Kava, Base, Celo or Aurora connect to the network first");
+        if (curve.chainId !== chainId) throw Error("To get volume for ZkSync, Moonbeam, Kava, Base, Celo, Aurora or Bsc connect to the network first");
         const [mainPoolsData, factoryPoolsData] = await Promise.all([
             _getLegacyAPYsAndVolumes(network),
             _getFactoryAPYsAndVolumes(network),
@@ -513,4 +633,34 @@ export const getCoinsData = async (curveObj = curve,    ...coins: string[] | str
     });
 
     return res;
+}
+
+
+export const hasDepositAndStake = (): boolean => curve.constants.ALIASES.deposit_and_stake !== curve.constants.ZERO_ADDRESS;
+export const hasRouter = (): boolean => curve.constants.ALIASES.router !== curve.constants.ZERO_ADDRESS;
+
+export const getCountArgsOfMethodByContract = (contract: Contract, methodName: string): number => {
+    const func = contract.interface.fragments.find((item: any) => item.name === methodName);
+    if(func) {
+        return func.inputs.length;
+    } else {
+        return -1;
+    }
+}
+
+export const getPoolName = (name: string): string => {
+    const separatedName = name.split(": ")
+    if(separatedName.length > 1) {
+        return separatedName[1].trim()
+    } else {
+        return separatedName[0].trim()
+    }
+}
+
+export const assetTypeNameHandler = (assetTypeName: string): REFERENCE_ASSET => {
+    if (assetTypeName.toUpperCase() === 'UNKNOWN') {
+        return 'OTHER';
+    } else {
+        return assetTypeName.toUpperCase() as REFERENCE_ASSET;
+    }
 }

@@ -24,6 +24,8 @@ import {
     _getCrvApyFromApi,
     _getRewardsFromApi,
     mulBy1_3,
+    smartNumber,
+    DIGas,
 } from '../utils.js';
 import {IDict, IReward, IProfit, IPoolType, ICurve} from '../interfaces';
 import { curve } from "../curve.js";
@@ -68,33 +70,34 @@ export class PoolTemplate {
     useLending: boolean[];
     inApi: boolean;
     isGaugeKilled: boolean;
+    gaugeStatus: Record<string, boolean> | null;
     estimateGas: {
-        depositApprove: (amounts: (number | string)[]) => Promise<number>,
-        deposit: (amounts: (number | string)[]) => Promise<number>,
-        depositWrappedApprove: (amounts: (number | string)[]) => Promise<number>,
-        depositWrapped: (amounts: (number | string)[]) => Promise<number>,
-        stakeApprove: (lpTokenAmount: number | string) => Promise<number>,
-        stake: (lpTokenAmount: number | string) => Promise<number>,
-        unstake: (lpTokenAmount: number | string) => Promise<number>,
-        claimCrv: () => Promise<number>,
-        claimRewards: () => Promise<number>,
-        depositAndStakeApprove: (amounts: (number | string)[]) => Promise<number>,
+        depositApprove: (amounts: (number | string)[]) => Promise<number | number[]>,
+        deposit: (amounts: (number | string)[]) => Promise<number | number[]>,
+        depositWrappedApprove: (amounts: (number | string)[]) => Promise<number | number[]>,
+        depositWrapped: (amounts: (number | string)[]) => Promise<number | number[]>,
+        stakeApprove: (lpTokenAmount: number | string) => Promise<number | number[]>,
+        stake: (lpTokenAmount: number | string) => Promise<number | number[]>,
+        unstake: (lpTokenAmount: number | string) => Promise<number | number[]>,
+        claimCrv: () => Promise<number | number[]>,
+        claimRewards: () => Promise<number | number[]>,
+        depositAndStakeApprove: (amounts: (number | string)[]) => Promise<number | number[]>,
         depositAndStake: (amounts: (number | string)[]) => Promise<number>,
-        depositAndStakeWrappedApprove: (amounts: (number | string)[]) => Promise<number>,
-        depositAndStakeWrapped: (amounts: (number | string)[]) => Promise<number>,
-        withdrawApprove: (lpTokenAmount: number | string) => Promise<number>,
-        withdraw: (lpTokenAmount: number | string) => Promise<number>,
-        withdrawWrapped: (lpTokenAmount: number | string) => Promise<number>,
-        withdrawImbalanceApprove: (amounts: (number | string)[]) => Promise<number>,
-        withdrawImbalance: (amounts: (number | string)[]) => Promise<number>,
-        withdrawImbalanceWrapped: (amounts: (number | string)[]) => Promise<number>,
-        withdrawOneCoinApprove: (lpTokenAmount: number | string) => Promise<number>,
-        withdrawOneCoin: (lpTokenAmount: number | string, coin: string | number) => Promise<number>,
-        withdrawOneCoinWrapped: (lpTokenAmount: number | string, coin: string | number) => Promise<number>,
-        swapApprove: (inputCoin: string | number, amount: number | string) => Promise<number>,
-        swap: (inputCoin: string | number, outputCoin: string | number, amount: number | string, slippage: number) => Promise<number>,
-        swapWrappedApprove: (inputCoin: string | number, amount: number | string) => Promise<number>,
-        swapWrapped: (inputCoin: string | number, outputCoin: string | number, amount: number | string, slippage: number) => Promise<number>,
+        depositAndStakeWrappedApprove: (amounts: (number | string)[]) => Promise<number | number[]>,
+        depositAndStakeWrapped: (amounts: (number | string)[]) => Promise<number | number[]>,
+        withdrawApprove: (lpTokenAmount: number | string) => Promise<number | number[]>,
+        withdraw: (lpTokenAmount: number | string) => Promise<number | number[]>,
+        withdrawWrapped: (lpTokenAmount: number | string) => Promise<number | number[]>,
+        withdrawImbalanceApprove: (amounts: (number | string)[]) => Promise<number | number[]>,
+        withdrawImbalance: (amounts: (number | string)[]) => Promise<number | number[]>,
+        withdrawImbalanceWrapped: (amounts: (number | string)[]) => Promise<number | number[]>,
+        withdrawOneCoinApprove: (lpTokenAmount: number | string) => Promise<number | number[]>,
+        withdrawOneCoin: (lpTokenAmount: number | string, coin: string | number) => Promise<number | number[]>,
+        withdrawOneCoinWrapped: (lpTokenAmount: number | string, coin: string | number) => Promise<number | number[]>,
+        swapApprove: (inputCoin: string | number, amount: number | string) => Promise<number | number[]>,
+        swap: (inputCoin: string | number, outputCoin: string | number, amount: number | string, slippage: number) => Promise<number | number[]>,
+        swapWrappedApprove: (inputCoin: string | number, amount: number | string) => Promise<number | number[]>,
+        swapWrapped: (inputCoin: string | number, outputCoin: string | number, amount: number | string, slippage: number) => Promise<number | number[]>,
     };
     stats: {
         parameters: () => Promise<{
@@ -162,6 +165,7 @@ export class PoolTemplate {
         this.useLending = poolData.use_lending || poolData.underlying_coin_addresses.map(() => false);
         this.inApi = poolData.in_api ?? false;
         this.isGaugeKilled = poolData.is_gauge_killed ?? false;
+        this.gaugeStatus = poolData.gauge_status ?? null;
         this.estimateGas = {
             depositApprove: this.depositApproveEstimateGas.bind(this),
             deposit: this.depositEstimateGas.bind(this),
@@ -385,9 +389,8 @@ export class PoolTemplate {
             const network = this.curve.constants.NETWORK_NAME;
             let poolType = this.isCrypto ? "crypto" : "main";
             if (this.id.startsWith("factory")) {
-                poolType = "factory";
-                const factoryType = this.id.split("-")[1];
-                if (factoryType !== "v2") poolType += "-" + factoryType;
+                poolType = this.id.replace(/-\d+$/, '');
+                poolType = poolType.replace(/-v2$/, '');
             }
             const poolsData = (await _getPoolsFromApi(network, poolType as IPoolType)).poolData;
 
@@ -412,7 +415,7 @@ export class PoolTemplate {
     }
 
     private statsVolume = async (): Promise<string> => {
-        if ([324, 1284, 2222, 8453, 42220, 1313161554].includes(this.curve.chainId)) {  // ZkSync || Moonbeam || Kava || Base || Celo || Aurora
+        if ([56, 324, 1284, 2222, 8453, 42220, 1313161554].includes(this.curve.chainId)) {  // Bsc || ZkSync || Moonbeam || Kava || Base || Celo || Aurora || Bsc
             const [mainPoolsData, factoryPoolsData] = await Promise.all([
                 _getLegacyAPYsAndVolumes(this.curve.constants.NETWORK_NAME),
                 _getFactoryAPYsAndVolumes(this.curve.constants.NETWORK_NAME),
@@ -435,7 +438,7 @@ export class PoolTemplate {
     }
 
     private statsBaseApy = async (): Promise<{ day: string, week: string }> => {
-        if ([324, 1284, 2222, 8453, 42220, 1313161554].includes(this.curve.chainId)) {  // ZkSync || Moonbeam || Kava || Base || Celo || Aurora
+        if ([56, 324, 1284, 2222, 8453, 42220, 1313161554].includes(this.curve.chainId)) {  // Bsc || ZkSync || Moonbeam || Kava || Base || Celo || Aurora
             const [mainPoolsData, factoryPoolsData] = await Promise.all([
                 _getLegacyAPYsAndVolumes(this.curve.constants.NETWORK_NAME),
                 _getFactoryAPYsAndVolumes(this.curve.constants.NETWORK_NAME),
@@ -602,7 +605,7 @@ export class PoolTemplate {
                     if (!BN(a).eq(BN(seedAmounts[i]))) throw Error(`Amounts must be = ${seedAmounts}`);
                 });
 
-                return parseUnits(Math.sqrt(amounts.map(Number).reduce((a, b) => a * b)));
+                return parseUnits(Math.pow(amounts.map(Number).reduce((a, b) => a * b), 1 / amounts.length));
             }
         }
 
@@ -785,7 +788,7 @@ export class PoolTemplate {
         return await hasAllowance(this.underlyingCoinAddresses, amounts, this.curve.signerAddress, this.zap || this.address);
     }
 
-    private async depositApproveEstimateGas(amounts: (number | string)[]): Promise<number> {
+    private async depositApproveEstimateGas(amounts: (number | string)[]): Promise<number | number[]> {
         return await ensureAllowanceEstimateGas(this.underlyingCoinAddresses, amounts, this.zap || this.address);
     }
 
@@ -794,7 +797,7 @@ export class PoolTemplate {
     }
 
     // OVERRIDE
-    private async depositEstimateGas(amounts: (number | string)[]): Promise<number> {
+    private async depositEstimateGas(amounts: (number | string)[]): Promise<number | number[]> {
         throw Error(`depositEstimateGas method doesn't exist for pool ${this.name} (id: ${this.name})`);
     }
 
@@ -837,7 +840,7 @@ export class PoolTemplate {
         return await hasAllowance(this.wrappedCoinAddresses, amounts, this.curve.signerAddress, this.address);
     }
 
-    private async depositWrappedApproveEstimateGas(amounts: (number | string)[]): Promise<number> {
+    private async depositWrappedApproveEstimateGas(amounts: (number | string)[]): Promise<number | number[]> {
         if (this.isFake) {
             throw Error(`depositWrappedApprove method doesn't exist for pool ${this.name} (id: ${this.name})`);
         }
@@ -872,7 +875,7 @@ export class PoolTemplate {
         return await hasAllowance([this.lpToken], [lpTokenAmount], this.curve.signerAddress, this.gauge);
     }
 
-    private async stakeApproveEstimateGas(lpTokenAmount: number | string): Promise<number> {
+    private async stakeApproveEstimateGas(lpTokenAmount: number | string): Promise<number | number[]> {
         if (this.gauge === curve.constants.ZERO_ADDRESS) {
             throw Error(`stakeApproveEstimateGas method doesn't exist for pool ${this.name} (id: ${this.name}). There is no gauge`);
         }
@@ -886,12 +889,12 @@ export class PoolTemplate {
         return await ensureAllowance([this.lpToken], [lpTokenAmount], this.gauge);
     }
 
-    private async stakeEstimateGas(lpTokenAmount: number | string): Promise<number> {
+    private async stakeEstimateGas(lpTokenAmount: number | string): Promise<number | number[]> {
         if (this.gauge === curve.constants.ZERO_ADDRESS) {
             throw Error(`stakeEstimateGas method doesn't exist for pool ${this.name} (id: ${this.name}). There is no gauge`);
         }
         const _lpTokenAmount = parseUnits(lpTokenAmount);
-        return Number(await this.curve.contracts[this.gauge].contract.deposit.estimateGas(_lpTokenAmount, this.curve.constantOptions));
+        return smartNumber(await this.curve.contracts[this.gauge].contract.deposit.estimateGas(_lpTokenAmount, this.curve.constantOptions));
     }
 
     public async stake(lpTokenAmount: number | string): Promise<string> {
@@ -902,16 +905,16 @@ export class PoolTemplate {
         await _ensureAllowance([this.lpToken], [_lpTokenAmount], this.gauge)
 
         await curve.updateFeeData();
-        const gasLimit = mulBy1_3(await this.curve.contracts[this.gauge].contract.deposit.estimateGas(_lpTokenAmount, this.curve.constantOptions));
+        const gasLimit = mulBy1_3(DIGas(await this.curve.contracts[this.gauge].contract.deposit.estimateGas(_lpTokenAmount, this.curve.constantOptions)));
         return (await this.curve.contracts[this.gauge].contract.deposit(_lpTokenAmount, { ...this.curve.options, gasLimit })).hash;
     }
 
-    private async unstakeEstimateGas(lpTokenAmount: number | string): Promise<number> {
+    private async unstakeEstimateGas(lpTokenAmount: number | string): Promise<number | number[]> {
         if (this.gauge === curve.constants.ZERO_ADDRESS) {
             throw Error(`unstakeEstimateGas method doesn't exist for pool ${this.name} (id: ${this.name}). There is no gauge`);
         }
         const _lpTokenAmount = parseUnits(lpTokenAmount);
-        return Number(await this.curve.contracts[this.gauge].contract.withdraw.estimateGas(_lpTokenAmount, this.curve.constantOptions));
+        return smartNumber(await this.curve.contracts[this.gauge].contract.withdraw.estimateGas(_lpTokenAmount, this.curve.constantOptions));
     }
 
     public async unstake(lpTokenAmount: number | string): Promise<string> {
@@ -921,7 +924,7 @@ export class PoolTemplate {
         const _lpTokenAmount = parseUnits(lpTokenAmount);
 
         await curve.updateFeeData();
-        const gasLimit = (await this.curve.contracts[this.gauge].contract.withdraw.estimateGas(_lpTokenAmount, this.curve.constantOptions)) * curve.parseUnits("200", 0) / curve.parseUnits("100", 0);
+        const gasLimit = DIGas((await this.curve.contracts[this.gauge].contract.withdraw.estimateGas(_lpTokenAmount, this.curve.constantOptions))) * curve.parseUnits("200", 0) / curve.parseUnits("100", 0);
         return (await this.curve.contracts[this.gauge].contract.withdraw(_lpTokenAmount, { ...this.curve.options, gasLimit })).hash;
     }
 
@@ -999,17 +1002,20 @@ export class PoolTemplate {
         return curve.formatUnits(await this.curve.contracts[this.gauge].contract.claimable_tokens(address, this.curve.constantOptions));
     }
 
-    public async claimCrvEstimateGas(): Promise<number> {
+    public async claimCrvEstimateGas(): Promise<number | number[]> {
         if (this.rewardsOnly()) throw Error(`${this.name} has Rewards-Only Gauge. Use claimRewards instead`);
-
-        return Number(await this.curve.contracts[this.curve.constants.ALIASES.minter].contract.mint.estimateGas(this.gauge, this.curve.constantOptions));
+        if(this.curve.chainId === 1) {
+            return Number(await this.curve.contracts[this.curve.constants.ALIASES.minter].contract.mint.estimateGas(this.gauge, this.curve.constantOptions));
+        } else {
+            return smartNumber(await this.curve.contracts[this.curve.constants.ALIASES.gauge_factory].contract.mint.estimateGas(this.gauge, this.curve.constantOptions));
+        }
     }
 
     public async claimCrv(): Promise<string> {
         if (this.rewardsOnly()) throw Error(`${this.name} has Rewards-Only Gauge. Use claimRewards instead`);
-        const contract = this.curve.contracts[this.curve.constants.ALIASES.minter].contract;
+        const contract = this.curve.chainId === 1 ? this.curve.contracts[this.curve.constants.ALIASES.minter].contract : this.curve.contracts[this.curve.constants.ALIASES.gauge_factory].contract;
 
-        const gasLimit = mulBy1_3(await contract.mint.estimateGas(this.gauge, this.curve.constantOptions));
+        const gasLimit = mulBy1_3(DIGas(await contract.mint.estimateGas(this.gauge, this.curve.constantOptions)));
         return (await contract.mint(this.gauge, { ...this.curve.options, gasLimit })).hash;
     }
 
@@ -1104,7 +1110,8 @@ export class PoolTemplate {
             }
             const tokens = (await this.curve.multicallProvider.all(tokenCalls) as string[])
                 .filter((addr) => addr !== curve.constants.ZERO_ADDRESS)
-                .map((addr) => addr.toLowerCase());
+                .map((addr) => addr.toLowerCase())
+                .filter((addr) => curve.chainId === 1 || addr !== curve.constants.COINS.crv);
 
             const tokenInfoCalls = [];
             for (const token of tokens) {
@@ -1259,14 +1266,14 @@ export class PoolTemplate {
         return rewards
     }
 
-    public async claimRewardsEstimateGas(): Promise<number> {
+    public async claimRewardsEstimateGas(): Promise<number | number[]> {
         if (this.gauge === curve.constants.ZERO_ADDRESS) {
             throw Error(`claimRewards method doesn't exist for pool ${this.name} (id: ${this.name}). There is no gauge`);
         }
         const gaugeContract = this.curve.contracts[this.gauge].contract;
         if (!("claim_rewards()" in gaugeContract)) throw Error (`${this.name} pool doesn't have such method`);
 
-        return Number(await gaugeContract.claim_rewards.estimateGas(this.curve.constantOptions));
+        return smartNumber(await gaugeContract.claim_rewards.estimateGas(this.curve.constantOptions));
     }
 
     public async claimRewards(): Promise<string> {
@@ -1276,7 +1283,7 @@ export class PoolTemplate {
         const gaugeContract = this.curve.contracts[this.gauge].contract;
         if (!("claim_rewards()" in gaugeContract)) throw Error (`${this.name} pool doesn't have such method`);
 
-        const gasLimit = mulBy1_3(await gaugeContract.claim_rewards.estimateGas(this.curve.constantOptions));
+        const gasLimit = mulBy1_3(DIGas(await gaugeContract.claim_rewards.estimateGas(this.curve.constantOptions)));
         return (await gaugeContract.claim_rewards({ ...this.curve.options, gasLimit })).hash;
     }
 
@@ -1313,18 +1320,23 @@ export class PoolTemplate {
         return coinsAllowance;
     }
 
-    private async depositAndStakeApproveEstimateGas(amounts: (number | string)[]): Promise<number> {
+    private async depositAndStakeApproveEstimateGas(amounts: (number | string)[]): Promise<number | number[]> {
         if (this.gauge === curve.constants.ZERO_ADDRESS) {
             throw Error(`depositAndStakeApprove method doesn't exist for pool ${this.name} (id: ${this.name}). There is no gauge`);
         }
-        const approveCoinsGas: number = await ensureAllowanceEstimateGas(this.underlyingCoinAddresses, amounts, this.curve.constants.ALIASES.deposit_and_stake);
+        const approveCoinsGas: number | number[] = await ensureAllowanceEstimateGas(this.underlyingCoinAddresses, amounts, this.curve.constants.ALIASES.deposit_and_stake);
 
         const gaugeContract = this.curve.contracts[this.gauge].contract;
         if ('approved_to_deposit' in gaugeContract) {
             const gaugeAllowance: boolean = await gaugeContract.approved_to_deposit(this.curve.constants.ALIASES.deposit_and_stake, this.curve.signerAddress, this.curve.constantOptions);
             if (!gaugeAllowance) {
-                const approveGaugeGas = Number(await gaugeContract.set_approve_deposit.estimateGas(this.curve.constants.ALIASES.deposit_and_stake, true, this.curve.constantOptions));
-                return approveCoinsGas + approveGaugeGas;
+                const approveGaugeGas = smartNumber(await gaugeContract.set_approve_deposit.estimateGas(this.curve.constants.ALIASES.deposit_and_stake, true, this.curve.constantOptions));
+                if(Array.isArray(approveCoinsGas) && Array.isArray(approveGaugeGas)) {
+                    return [approveCoinsGas[0] + approveGaugeGas[0], approveCoinsGas[1] + approveGaugeGas[1]];
+                }
+                if(!Array.isArray(approveCoinsGas) && !Array.isArray(approveGaugeGas)) {
+                    return approveCoinsGas + approveGaugeGas;
+                }
             }
         }
 
@@ -1403,20 +1415,25 @@ export class PoolTemplate {
         return coinsAllowance;
     }
 
-    private async depositAndStakeWrappedApproveEstimateGas(amounts: (number | string)[]): Promise<number> {
+    private async depositAndStakeWrappedApproveEstimateGas(amounts: (number | string)[]): Promise<number | number[]> {
         if (this.gauge === curve.constants.ZERO_ADDRESS) {
             throw Error(`depositAndStakeWrappedApprove method doesn't exist for pool ${this.name} (id: ${this.name}). There is no gauge`);
         }
         if (this.isPlain || this.isFake) throw Error(`depositAndStakeWrappedApprove method doesn't exist for pool ${this.name} (id: ${this.name})`);
 
-        const approveCoinsGas: number = await ensureAllowanceEstimateGas(this.wrappedCoinAddresses, amounts, this.curve.constants.ALIASES.deposit_and_stake);
+        const approveCoinsGas: number | number[] = await ensureAllowanceEstimateGas(this.wrappedCoinAddresses, amounts, this.curve.constants.ALIASES.deposit_and_stake);
 
         const gaugeContract = this.curve.contracts[this.gauge].contract;
         if ('approved_to_deposit' in gaugeContract) {
             const gaugeAllowance: boolean = await gaugeContract.approved_to_deposit(this.curve.constants.ALIASES.deposit_and_stake, this.curve.signerAddress, this.curve.constantOptions);
             if (!gaugeAllowance) {
                 const approveGaugeGas = Number(await gaugeContract.set_approve_deposit.estimateGas(this.curve.constants.ALIASES.deposit_and_stake, true, this.curve.constantOptions));
-                return approveCoinsGas + approveGaugeGas;
+                if(Array.isArray(approveCoinsGas) && Array.isArray(approveGaugeGas)) {
+                    return [approveCoinsGas[0] + approveGaugeGas[0], approveCoinsGas[1] + approveGaugeGas[1]];
+                }
+                if(!Array.isArray(approveCoinsGas) && !Array.isArray(approveGaugeGas)) {
+                    return approveCoinsGas + approveGaugeGas;
+                }
             }
         }
 
@@ -1462,7 +1479,7 @@ export class PoolTemplate {
         return await this._depositAndStake(amounts, slippage, false, false) as string
     }
 
-    private async _depositAndStake(amounts: (number | string)[], slippage: number, isUnderlying: boolean, estimateGas: boolean): Promise<string | number> {
+    private async _depositAndStake(amounts: (number | string)[], slippage: number, isUnderlying: boolean, estimateGas: boolean): Promise<string | number | number[]> {
         const coinAddresses = isUnderlying ? [...this.underlyingCoinAddresses] : [...this.wrappedCoinAddresses];
         const coins = isUnderlying ? this.underlyingCoins : this.wrappedCoinAddresses;
         const decimals = isUnderlying ? this.underlyingDecimals : this.wrappedDecimals;
@@ -1523,10 +1540,10 @@ export class PoolTemplate {
             { ...this.curve.constantOptions, value }
         ))
 
-        if (estimateGas) return Number(_gas)
+        if (estimateGas) return smartNumber(_gas)
 
         await curve.updateFeeData();
-        const gasLimit = _gas * curve.parseUnits("200", 0) / curve.parseUnits("100", 0);
+        const gasLimit = DIGas(_gas) * curve.parseUnits("200", 0) / curve.parseUnits("100", 0);
         return (await contract.deposit_and_stake(
             depositAddress,
             this.lpToken,
@@ -1553,7 +1570,7 @@ export class PoolTemplate {
         return await hasAllowance([this.lpToken], [lpTokenAmount], this.curve.signerAddress, this.zap as string);
     }
 
-    private async withdrawApproveEstimateGas(lpTokenAmount: number | string): Promise<number> {
+    private async withdrawApproveEstimateGas(lpTokenAmount: number | string): Promise<number | number[]> {
         if (!this.zap) return 0;
         return await ensureAllowanceEstimateGas([this.lpToken], [lpTokenAmount], this.zap as string);
     }
@@ -1564,7 +1581,7 @@ export class PoolTemplate {
     }
 
     // OVERRIDE
-    private async withdrawEstimateGas(lpTokenAmount: number | string): Promise<number> {
+    private async withdrawEstimateGas(lpTokenAmount: number | string): Promise<number | number[]> {
         throw Error(`withdraw method doesn't exist for pool ${this.name} (id: ${this.name})`);
     }
 
@@ -1622,7 +1639,7 @@ export class PoolTemplate {
         return true;
     }
 
-    private async withdrawImbalanceApproveEstimateGas(amounts: (number | string)[]): Promise<number> {
+    private async withdrawImbalanceApproveEstimateGas(amounts: (number | string)[]): Promise<number | number[]> {
         if (this.isCrypto) throw Error(`withdrawImbalanceApprove method doesn't exist for pool ${this.name} (id: ${this.name})`);
 
         if (this.zap) {
@@ -1719,7 +1736,7 @@ export class PoolTemplate {
         return await hasAllowance([this.lpToken], [lpTokenAmount], this.curve.signerAddress, this.zap as string);
     }
 
-    private async withdrawOneCoinApproveEstimateGas(lpTokenAmount: number | string): Promise<number> {
+    private async withdrawOneCoinApproveEstimateGas(lpTokenAmount: number | string): Promise<number | number[]> {
         if (!this.zap) return 0
         return await ensureAllowanceEstimateGas([this.lpToken], [lpTokenAmount], this.zap as string);
     }
@@ -1730,7 +1747,7 @@ export class PoolTemplate {
     }
 
     // OVERRIDE
-    private async withdrawOneCoinEstimateGas(lpTokenAmount: number | string, coin: string | number): Promise<number> {
+    private async withdrawOneCoinEstimateGas(lpTokenAmount: number | string, coin: string | number): Promise<number | number[]> {
         throw Error(`withdrawOneCoin method doesn't exist for pool ${this.name} (id: ${this.name})`);
     }
 
@@ -2011,7 +2028,7 @@ export class PoolTemplate {
         return await hasAllowance([this.underlyingCoinAddresses[i]], [amount], this.curve.signerAddress, contractAddress);
     }
 
-    private async swapApproveEstimateGas (inputCoin: string | number, amount: number | string): Promise<number> {
+    private async swapApproveEstimateGas (inputCoin: string | number, amount: number | string): Promise<number | number[]> {
         const contractAddress = this._swapContractAddress();
         const i = this._getCoinIdx(inputCoin);
         return await ensureAllowanceEstimateGas([this.underlyingCoinAddresses[i]], [amount], contractAddress);
@@ -2072,7 +2089,7 @@ export class PoolTemplate {
     }
 
     // OVERRIDE
-    private async swapWrappedApproveEstimateGas(inputCoin: string | number, amount: number | string): Promise<number> {
+    private async swapWrappedApproveEstimateGas(inputCoin: string | number, amount: number | string): Promise<number | number[]> {
         throw Error(`swapWrappedApprove method doesn't exist for pool ${this.name} (id: ${this.name})`);
     }
 
@@ -2082,7 +2099,7 @@ export class PoolTemplate {
     }
 
     // OVERRIDE
-    private async swapWrappedEstimateGas(inputCoin: string | number, outputCoin: string | number, amount: number | string): Promise<number> {
+    private async swapWrappedEstimateGas(inputCoin: string | number, outputCoin: string | number, amount: number | string): Promise<number | number[]> {
         throw Error(`swapWrapped method doesn't exist for pool ${this.name} (id: ${this.name})`);
     }
 

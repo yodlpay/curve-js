@@ -28,6 +28,8 @@ import Plain6BasicABI from "../constants/abis/factory-v2/Plain6Basic.json" asser
 import Plain6BalancesABI from "../constants/abis/factory-v2/Plain6Balances.json" assert { type: 'json' };
 import Plain6ETHABI from "../constants/abis/factory-v2/Plain6ETH.json" assert { type: 'json' };
 import Plain6OptimizedABI from "../constants/abis/factory-v2/Plain6Optimized.json" assert { type: 'json' };
+import PlainStableSwapNGABI from "../constants/abis/factory-stable-ng/plain-stableswap-ng.json" assert { type: 'json' };
+import MetaStableSwapNGABI from "../constants/abis/factory-stable-ng/meta-stableswap-ng.json" assert {type: 'json'};
 // --- ZAPS --
 import factoryDepositABI from "../constants/abis/factoryPools/deposit.json" assert { type: 'json' };
 import fraxusdcMetaZapABI from "../constants/abis/fraxusdc/meta_zap.json" assert { type: 'json' };
@@ -69,7 +71,11 @@ export const implementationABIDictEthereum: IDict<any> = lowerCaseKeys({
     "0x847ee1227A9900B73aEeb3a47fAc92c52FD54ed9": Plain2ETHOracleABI,   // EMA id 5
     "0x94b4DFd9Ba5865Cc931195c99A2db42F3fc5d45B": Plain2ETHABI,         // EMA deprecated
 
-    "0x67fe41A94e779CcFa22cff02cc2957DC9C0e4286": Plain2BasicABI, // !!! crvUSD Factory !!!
+    // !!! crvUSD Factory !!!
+    "0x67fe41A94e779CcFa22cff02cc2957DC9C0e4286": Plain2BasicABI,
+    "0x7Ca46A636b02D4aBC66883D7FF164bDE506DC66a": Plain2BalancesABI,
+    "0x36Dc03C0e12a1C241306a6A8F327Fe28bA2Be5b0": Plain2BasicABI,
+    // !!! crvUSD Factory !!!
 
     "0x9B52F13DF69D79Ec5aAB6D1aCe3157d29B409cC3": Plain3BasicABI,
     "0x50b085f2e5958C4A87baf93A8AB79F6bec068494": Plain3BalancesABI,
@@ -80,6 +86,12 @@ export const implementationABIDictEthereum: IDict<any> = lowerCaseKeys({
     "0xd35B58386705CE75CE6d09842E38E9BE9CDe5bF6": Plain4BalancesABI,
     "0x88855cdF2b0A8413D470B86952E726684de915be": Plain4ETHABI,
     "0xaD4753D045D3Aed5C1a6606dFb6a7D7AD67C1Ad7": Plain4OptimizedABI,
+
+    //"0x3E3B5F27bbf5CC967E074b70E9f4046e31663181": PlainStableSwapNGABI,
+    //"0x64afa95e0c3d8410240a4262df9fd82b12b64edd": MetaStableSwapNGABI,
+    //"0x1f7C86AffE5bCF7a1D74a8c8E2ef9E03BF31c1BD": MetaStableSwapNGABI,
+    "0x933f4769DCC27fC7345D9d5975AE48EC4D0F829C": PlainStableSwapNGABI,
+    "0xDD7EBB1C49780519dD9755B8B1A23a6f42CE099E": MetaStableSwapNGABI,
 });
 
 export const implementationABIDictPolygon: IDict<any> = lowerCaseKeys({
@@ -103,6 +115,9 @@ export const implementationABIDictPolygon: IDict<any> = lowerCaseKeys({
     "0xC7c46488566b9ef9B981b87E328939CaA5ca152f": Plain4BalancesABI,
     "0xf31bcdf0B9a5eCD7AB463eB905551fBc32e51856": Plain4ETHABI,
     "0xAc273d5b4FC06625d8b1abA3BE8De15bDFb8E39f": Plain4OptimizedABI,
+
+    //"0x506F594ceb4E33F5161139bAe3Ee911014df9f7f": PlainStableSwapNGABI,
+    //"0x87FE17697D0f14A222e8bEf386a0860eCffDD617": MetaStableSwapNGABI,
 });
 
 export const implementationABIDictFantom: IDict<any> = lowerCaseKeys({
@@ -136,6 +151,9 @@ export const implementationABIDictFantom: IDict<any> = lowerCaseKeys({
     "0x2C996b11a73276787Eb637D4459d1A7fea16B310": Plain6BalancesABI,
     "0xa4Fc50E45aF5bF22b519468c7c342C704e1F3d44": Plain6ETHABI,
     "0x65e38C41CcE6D9Bc202209Cc546B2f63985D4139": Plain6OptimizedABI,
+
+    //"0xd2002373543Ce3527023C75e7518C274A51ce712": PlainStableSwapNGABI,
+    //"0x686bdb3D24Bc6F3ED89ed3d3B659765c54aC78B4": MetaStableSwapNGABI,
 });
 
 export const implementationABIDictAvalanche: IDict<any> = lowerCaseKeys({
@@ -187,6 +205,9 @@ export const implementationABIDictArbitrum: IDict<any> = lowerCaseKeys({
     "0x2ac56cEBc2D27c9bB51a11773355E44371Eb88D3": Plain4BalancesABI,
     "0x89287c32c2CAC1C76227F6d300B2DBbab6b75C08": Plain4ETHABI,
     "0x06e3C4da96fd076b97b7ca3Ae23527314b6140dF": Plain4OptimizedABI,
+
+    //"0x76303e4fDcA0AbF28aB3ee42Ce086E6503431F1D": PlainStableSwapNGABI,
+    //"0xd125E7a0cEddF89c6473412d85835450897be6Dc": MetaStableSwapNGABI,
 });
 
 export const implementationABIDictOptimism: IDict<any> = lowerCaseKeys({
@@ -212,6 +233,9 @@ export const implementationABIDictOptimism: IDict<any> = lowerCaseKeys({
     "0xF6bDc2619FFDA72c537Cd9605e0A274Dc48cB1C9": Plain4BalancesABI,
     "0x1AEf73d49Dedc4b1778d0706583995958Dc862e6": Plain4ETHABI,
     "0x8474DdbE98F5aA3179B3B3F5942D724aFcdec9f6": Plain4OptimizedABI,
+
+    //"0x87FE17697D0f14A222e8bEf386a0860eCffDD617": PlainStableSwapNGABI,
+    //"0x1764ee18e8B3ccA4787249Ceb249356192594585": MetaStableSwapNGABI,
 })
 
 export const implementationABIDictXDai: IDict<any> = lowerCaseKeys({
@@ -232,6 +256,9 @@ export const implementationABIDictXDai: IDict<any> = lowerCaseKeys({
     "0xcB4eB43E31C830e22baF764c64F11F32C280496c": Plain4BalancesABI,
     "0xc1C49622b63B961ce1D352ecb7D8261Ab5556695": Plain4ETHABI,
     "0x0E2615ce69Cd3Dc3Ff6f66a975bEa0655F3bA7b9": Plain4OptimizedABI,
+
+    //"0xd2002373543Ce3527023C75e7518C274A51ce712": PlainStableSwapNGABI,
+    //"0xd3B17f862956464ae4403cCF829CE69199856e1e": MetaStableSwapNGABI,
 });
 
 export const implementationABIDictMoonbeam: IDict<any> = lowerCaseKeys({
@@ -266,6 +293,9 @@ export const implementationABIDictKava: IDict<any> = lowerCaseKeys({
     "0xd59c875dccb6cdcb3a75b91b58a363b5e4b0ca9a": Plain4BalancesABI,
     "0x6378dd741b24bd884f3590d7bc7555fdb2f5b003": Plain4ETHABI,
     "0x509495dfeec3a53acb2f60669985d868131ad9a5": Plain4OptimizedABI,
+
+    //"0x1764ee18e8B3ccA4787249Ceb249356192594585": PlainStableSwapNGABI,
+    //"0x87FE17697D0f14A222e8bEf386a0860eCffDD617": MetaStableSwapNGABI,
 });
 
 export const implementationABIDictCelo: IDict<any> = lowerCaseKeys({
@@ -283,6 +313,9 @@ export const implementationABIDictCelo: IDict<any> = lowerCaseKeys({
     "0x3730D8B82BF3fF6Cc6dFDBe2Fd7B2A655e74eAae": Plain4BalancesABI,
     "0x0F5390AB4C5456a769056C96E4D7C71770b52319": Plain4ETHABI,
     "0xA73b02a97B45604cd9f0BBAA153eCfe01f409350": Plain4OptimizedABI,
+
+    //"0x506F594ceb4E33F5161139bAe3Ee911014df9f7f": PlainStableSwapNGABI,
+    //"0x87FE17697D0f14A222e8bEf386a0860eCffDD617": MetaStableSwapNGABI,
 });
 
 export const implementationABIDictZkSync: IDict<any> = lowerCaseKeys({
@@ -317,90 +350,30 @@ export const implementationABIDictBase: IDict<any> = lowerCaseKeys({
     "0x2FdDeDF2D842f23da2B81b9144e75cEcb691Bf19": Plain4BalancesABI,
     "0x50E09Ee7080b32aef3e92346891dD2DD389B5fAf": Plain4ETHABI,
     "0x44d9B3f4EE15AC81FEb918501fca0ddc9d83C976": Plain4OptimizedABI,
+
+    //"0x1764ee18e8B3ccA4787249Ceb249356192594585": PlainStableSwapNGABI,
+    //"0x5eee3091f747e60a045a2e715a4c71e600e31f6e": MetaStableSwapNGABI,
 })
 
-export const implementationBasePoolIdDictEthereum: IDict<string> = lowerCaseKeys({
-    "0x5F890841f657d90E081bAbdB532A05996Af79Fe6": "3pool",
+export const implementationABIDictBsc: IDict<any> = lowerCaseKeys({
+    "0xB90B9B1F91a01Ea22A182CD84C1E22222e39B415": Plain2BasicABI,
+    "0x7CDE88e96E9445D986537074B1bFD32c5623c71f": Plain2BalancesABI,
+    "0x5BD917879e04Cf18EC79285a1C960C5fbA7f5EA3": Plain2ETHABI,
+    "0x630C7Ad3998f397df0c0A8FfDB7a65B61ec5539E": Plain2OptimizedABI,
 
-    "0x213be373FDff327658139C7df330817DAD2d5bBE": "3pool",
-    "0x55Aa9BF126bCABF0bDC17Fa9E39Ec9239e1ce7A9": "3pool",
+    "0xD166EEdf272B860E991d331B71041799379185D5": Plain3BasicABI,
+    "0x5C627d6925e448Ae418BC8a45d56B31fe5009Bea": Plain3BalancesABI,
+    "0x22D710931F01c1681Ca1570Ff016eD42EB7b7c2a": Plain3ETHABI,
+    "0xA50d9a424A14aF0b9e7e9243dc1597d977f6cB09": Plain3OptimizedABI,
 
-    "0x33bB0e62d5e8C688E645Dd46DFb48Cd613250067": "fraxusdc",
-    "0x2EB24483Ef551dA247ab87Cf18e1Cc980073032D": "fraxusdc",
+    "0xeD49979026DC44DC7E83b1471794ec9b2a365Ea2": Plain4BasicABI,
+    "0x0Cc51c9786f3777a6d50961CEBb2BB6E69ec5e07": Plain4BalancesABI,
+    "0x0a31527a8dE2Ee97BBD8cCE14Db8E8826a0b6C4f": Plain4ETHABI,
+    "0x1086F023146f9026A9Bb22983CE866813C59518A": Plain4OptimizedABI,
 
-    "0xF9B62b61d108232Ef0C9DD143bb3c22c7D4A715a": "fraxusdp",
-    "0xB172AC2Fe440B5dA74Dc460e5E9d96bc2BF6261F": "fraxusdp",
-
-    "0xC6A8466d128Fbfd34AdA64a9FFFce325D57C9a52": "sbtc",
-    "0xc4C78b08fA0c3d0a312605634461A88184Ecd630": "sbtc",
-
-    "0xECAaecd9d2193900b424774133B1f51ae0F29d9E": "ren",
-    "0x40fD58D44cFE63E8517c9Bb3ac98676838Ea56A8": "ren",
-
-    "0x008CFa89df5B0c780cA3462fc2602D7F8c7Ac315": "sbtc2",
-    "0xAbc533EbCDdeD41215C46ee078C5818B5b0A252F": "sbtc2",
-});
-
-export const implementationBasePoolIdDictPolygon: IDict<string> = lowerCaseKeys({
-    "0x4fb93D7d320E8A263F22f62C2059dFC2A8bCbC4c": "aave",
-    "0x39fE1824f98CD828050D7c51dA443E84121c7cf1": "aave",
-
-    "0xC05EB760A135d3D0c839f1141423002681157a17": "ren",
-    "0xD8336532f6ED7b94282fAF724fe41d6145E07Cfc": "ren",
-});
-
-export const implementationBasePoolIdDictFantom: IDict<string> = lowerCaseKeys({
-    "0xfCE359115dFe1533a2458650123F86C454BC0213": "2pool",
-    "0x09C62ad0694e3f1ad8cF8876aaBe56138C586f5F": "2pool",
-
-    "0xC9438d8928486bD9621D326002F4672bF684187A": "ren",
-    "0x2b70A5B878665FfDB4A06Ba40a264d6c70f68F4B": "ren",
-
-    "0x210C806F6AE850279f7E298dE749EC4B427d00DD": "geist",
-    "0xf82162bB68aD5a168345bb7EFb2faA0EDCCA5177": "geist",
-});
-
-export const implementationBasePoolIdDictAvalanche: IDict<string> = lowerCaseKeys({
-    "0xA237034249290De2B07988Ac64b96f22c0E76fE0": "aave",
-    "0xc50C05Ca1f8C2346664bd0d4a1eb6aC1Da38414f": "aave",
-
-    "0xa27f39E9C21b3376F43266E13Ad5A5d6E9BdB320": "ren",
-    "0x505C34ED8dBE96d2D5C7D83158aA844887770970": "ren",
-});
-
-export const implementationBasePoolIdDictArbitrum: IDict<string> = lowerCaseKeys({
-    "0x09672362833d8f703D5395ef3252D4Bfa51c15ca": "2pool",
-    "0xBE175115BF33E12348ff77CcfEE4726866A0Fbd5": "2pool",
-
-    "0x094d12e5b541784701FD8d65F11fc0598FBC6332": "ren",
-    "0xF1f85a74AD6c64315F85af52d3d46bF715236ADc": "ren",
-
-    "0x8DEb66a4A40E370355bEe35f12E55Fe9c755d686": "factory-v2-41", // fraxbp
-    "0x3edE9b145F82e9e46C03f8A8F67B77aEE847b632": "factory-v2-41", // fraxbp
-});
-
-export const implementationBasePoolIdDictOptimism: IDict<string> = lowerCaseKeys({
-    "0x78CF256256C8089d68Cde634Cf7cDEFb39286470": "3pool",
-    "0xADf698e4d8Df08b3E2c79682891636eF00F6e205": "3pool",
-
-    "0xe8269B33E47761f552E1a3070119560d5fa8bBD6": "factory-v2-16", // fraxusdc
-    "0x114C4042B11a2b16F58Fe1BFe847589a122F678a": "factory-v2-16", // fraxusdc
-});
-
-export const implementationBasePoolIdDictXDai: IDict<string> = lowerCaseKeys({
-    "0x4A5bF7Ab9A8202692051c19B102d3eDD62aaBAE6": "3pool",
-    "0x0B4dc7A945695D11FD83e40B2DfC2B896A02395F": "3pool",
-});
-
-export const implementationBasePoolIdDictMoonbeam: IDict<string> = lowerCaseKeys({});
-
-export const implementationBasePoolIdDictKava: IDict<string> = lowerCaseKeys({});
-
-export const implementationBasePoolIdDictCelo: IDict<string> = lowerCaseKeys({});
-
-export const implementationBasePoolIdDictZkSync: IDict<string> = lowerCaseKeys({});
-
-export const implementationBasePoolIdDictBase: IDict<string> = lowerCaseKeys({});
+    //"0x604388Bb1159AFd21eB5191cE22b4DeCdEE2Ae22": PlainStableSwapNGABI,
+    //"0x06452f9c013fc37169B57Eab8F50A7A48c9198A3": MetaStableSwapNGABI,
+})
 
 export const basePoolIdZapDictEthereum: IDict<{ address: string, ABI: any }> = {
     '3pool': {
@@ -509,65 +482,59 @@ export const basePoolIdZapDictZkSync: IDict<{ address: string, ABI: any }> = {}
 
 export const basePoolIdZapDictBase: IDict<{ address: string, ABI: any }> = {}
 
-export const FACTORY_CONSTANTS: { [index: number]: { implementationABIDict: IDict<any>, implementationBasePoolIdDict: IDict<string>, basePoolIdZapDict: IDict<{ address: string, ABI: any }> } } = {
+export const basePoolIdZapDictBsc: IDict<{ address: string, ABI: any }> = {}
+
+export const FACTORY_CONSTANTS: { [index: number]: { implementationABIDict: IDict<any>, basePoolIdZapDict: IDict<{ address: string, ABI: any }> } } = {
     1: {  // ETH
         implementationABIDict: implementationABIDictEthereum,
-        implementationBasePoolIdDict: implementationBasePoolIdDictEthereum,
         basePoolIdZapDict: basePoolIdZapDictEthereum,
     },
     10: {  // OPTIMISM
         implementationABIDict: implementationABIDictOptimism,
-        implementationBasePoolIdDict: implementationBasePoolIdDictOptimism,
         basePoolIdZapDict: basePoolIdZapDictOptimism,
+    },
+    56: {  // BSC
+        implementationABIDict: implementationABIDictBsc,
+        basePoolIdZapDict: basePoolIdZapDictBsc,
     },
     100: {  // XDAI
         implementationABIDict: implementationABIDictXDai,
-        implementationBasePoolIdDict: implementationBasePoolIdDictXDai,
         basePoolIdZapDict: basePoolIdZapDictXDai,
     },
     137: {  // POLYGON
         implementationABIDict: implementationABIDictPolygon,
-        implementationBasePoolIdDict: implementationBasePoolIdDictPolygon,
         basePoolIdZapDict: basePoolIdZapDictPolygon,
     },
     250: {  // FANTOM
         implementationABIDict: implementationABIDictFantom,
-        implementationBasePoolIdDict: implementationBasePoolIdDictFantom,
         basePoolIdZapDict: basePoolIdZapDictFantom,
     },
     324: {  // ZKSYNC
         implementationABIDict: implementationABIDictZkSync,
-        implementationBasePoolIdDict: implementationBasePoolIdDictZkSync,
         basePoolIdZapDict: basePoolIdZapDictZkSync,
     },
     1284: {  // MOONBEAM
         implementationABIDict: implementationABIDictMoonbeam,
-        implementationBasePoolIdDict: implementationBasePoolIdDictMoonbeam,
         basePoolIdZapDict: basePoolIdZapDictMoonbeam,
     },
     2222: {  // KAVA
         implementationABIDict: implementationABIDictKava,
-        implementationBasePoolIdDict: implementationBasePoolIdDictKava,
         basePoolIdZapDict: basePoolIdZapDictKava,
     },
     8453: {  // BASE
         implementationABIDict: implementationABIDictBase,
-        implementationBasePoolIdDict: implementationBasePoolIdDictBase,
         basePoolIdZapDict: basePoolIdZapDictBase,
     },
     42220: {  // CELO
         implementationABIDict: implementationABIDictCelo,
-        implementationBasePoolIdDict: implementationBasePoolIdDictCelo,
         basePoolIdZapDict: basePoolIdZapDictCelo,
     },
     43114: {  // AVALANCHE
         implementationABIDict: implementationABIDictAvalanche,
-        implementationBasePoolIdDict: implementationBasePoolIdDictAvalanche,
         basePoolIdZapDict: basePoolIdZapDictAvalanche,
     },
     42161: {  // ARBITRUM
         implementationABIDict: implementationABIDictArbitrum,
-        implementationBasePoolIdDict: implementationBasePoolIdDictArbitrum,
         basePoolIdZapDict: basePoolIdZapDictArbitrum,
     },
 }

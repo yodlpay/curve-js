@@ -5,10 +5,11 @@ export interface IDict<T> {
     [index: string]: T,
 }
 
-export type INetworkName = "ethereum" | "optimism" | "xdai" | "polygon" | "fantom" | "zksync" | "moonbeam" | "kava" | "base" | "arbitrum" | "celo" | "avalanche" | "aurora";
-export type IChainId = 1 | 10 | 100 | 137 | 250 | 324 | 1284 | 2222 | 8453 | 42161 | 42220 | 43114 | 1313161554;
-export type IFactoryPoolType = "factory" | "factory-crvusd" | "factory-eywa" | "factory-crypto" | "factory-tricrypto";
+export type INetworkName = "ethereum" | "bsc" | "optimism" | "xdai" | "polygon" | "fantom" | "zksync" | "moonbeam" | "kava" | "base" | "arbitrum" | "celo" | "avalanche" | "aurora";
+export type IChainId = 1 | 10 | 56 | 100 | 137 | 250 | 324 | 1284 | 2222 | 8453 | 42161 | 42220 | 43114 | 1313161554;
+export type IFactoryPoolType = "factory" | "factory-crvusd" | "factory-eywa" | "factory-crypto" | "factory-tricrypto" | "factory-stable-ng";
 export type IPoolType = "main" | "crypto" | IFactoryPoolType;
+export type ISwapType = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 
 export type REFERENCE_ASSET = 'USD' | 'EUR' | 'BTC' | 'ETH' | 'LINK' | 'CRYPTO' | 'OTHER';
 
@@ -46,6 +47,7 @@ export interface IPoolData {
     sCurveRewards_abi?: any,
     in_api?: boolean,
     is_gauge_killed?: boolean,
+    gauge_status?: Record<string, boolean> | null,
 }
 
 export interface ICurve {
@@ -105,6 +107,8 @@ export interface IPoolDataFromApi {
     symbol: string,
     assetTypeName: string,
     address: string,
+    isMetaPool: boolean,
+    basePoolAddress?: string,
     lpTokenAddress?: string,
     gaugeAddress?: string,
     implementation: string,
@@ -115,6 +119,11 @@ export interface IPoolDataFromApi {
     totalSupply: number,
     amplificationCoefficient: string,
     gaugeCrvApy: [number | null, number | null],
+}
+
+export interface IPoolDataShort {
+    id: string,
+    address: string,
 }
 
 export interface ISubgraphPoolData {
@@ -132,13 +141,16 @@ export interface IExtendedPoolDataFromApi {
 
 export interface IRouteStep {
     poolId: string,
-    poolAddress: string,
+    swapAddress: string,
     inputCoinAddress: string,
     outputCoinAddress: string,
-    i: number,
-    j: number,
-    swapType: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15,
-    swapAddress: string,  // for swapType == 4
+    swapParams: [number, number, ISwapType, number, number],  // i, j, swap_type, pool_type, n_coins
+    poolAddress: string,
+    basePool: string,
+    baseToken: string,
+    secondBasePool: string,
+    secondBaseToken: string,
+    tvl: number,
 }
 
 export type IRoute = IRouteStep[];

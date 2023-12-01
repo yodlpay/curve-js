@@ -1,6 +1,6 @@
 import { assert } from "chai";
 import { curve } from "../src/curve.js";
-import { ETH_RPC } from "./rpcUrls.test.js";
+import { ETH_RPC, ARBITRUM_RPC, AURORA_RPC } from "./rpcUrls.test.js";
 import { IDict, IPoolData } from "../src/interfaces.js";
 import { BLACK_LIST } from "../src/factory/factory.js";
 
@@ -77,8 +77,10 @@ describe('Factory pools data', async function () {
     it('Factory', async function () {
         await curve.fetchFactoryPools();
         const factoryPoolsDataFromApi = { ...curve.constants.FACTORY_POOLS_DATA };
-        BLACK_LIST[1].forEach((item:string) => {
-            for(let key in factoryPoolsDataFromApi) {
+        const blacklist = BLACK_LIST[curve.chainId] ?? [];
+
+        blacklist.forEach((item:string) => {
+            for(const key in factoryPoolsDataFromApi) {
                 if(factoryPoolsDataFromApi[key].swap_address === item) {
                     delete factoryPoolsDataFromApi[key]
                 }
@@ -104,6 +106,15 @@ describe('Factory pools data', async function () {
         const factoryPoolsDataFromApi = { ...curve.constants.EYWA_FACTORY_POOLS_DATA };
         await curve.fetchEywaFactoryPools(false);
         const factoryPoolsData = { ...curve.constants.EYWA_FACTORY_POOLS_DATA };
+
+        factoryPoolsDataTest(factoryPoolsDataFromApi, factoryPoolsData, false);
+    });
+
+    it('Stable NG factory', async function () {
+        await curve.fetchStableNgFactoryPools();
+        const factoryPoolsDataFromApi = { ...curve.constants.STABLE_NG_FACTORY_POOLS_DATA };
+        await curve.fetchStableNgFactoryPools(false);
+        const factoryPoolsData = { ...curve.constants.STABLE_NG_FACTORY_POOLS_DATA };
 
         factoryPoolsDataTest(factoryPoolsDataFromApi, factoryPoolsData, false);
     });

@@ -1,5 +1,5 @@
 import { curve } from "../curve.js";
-import { IDict, IFactoryPoolType, IPoolData, ICurve, IPoolDataFromApi, REFERENCE_ASSET } from "../interfaces";
+import { IDict, IFactoryPoolType, IPoolData, ICurve, IPoolDataFromApi } from "../interfaces";
 import factoryGaugeABI from "../constants/abis/gauge_factory.json" assert { type: 'json' };
 import gaugeChildABI from "../constants/abis/gauge_child.json" assert { type: 'json' };
 import ERC20ABI from "../constants/abis/ERC20.json" assert { type: 'json' };
@@ -7,8 +7,9 @@ import cryptoFactorySwapABI from "../constants/abis/factory-crypto/factory-crypt
 import tricryptoFactorySwapABI from "../constants/abis/factory-tricrypto/factory-tricrypto-pool.json" assert { type: 'json' };
 import { FACTORY_CONSTANTS } from "./constants.js";
 import { CRYPTO_FACTORY_CONSTANTS } from "./constants-crypto.js";
-import { setFactoryZapContracts } from "./common.js";
+import { getPoolIdByAddress, setFactoryZapContracts } from "./common.js";
 import { _getPoolsFromApi } from "../external-api.js";
+import { assetTypeNameHandler, getPoolName } from "../utils.js";
 
 export const lowerCasePoolDataAddresses = (poolsData: IPoolDataFromApi[]): IPoolDataFromApi[] => {
     for (const poolData of poolsData) {
@@ -112,7 +113,7 @@ export async function getFactoryPoolsDataFromApi(this: ICurve, factoryType: IFac
                 const basePoolZap = basePoolIdZapDict[basePoolId];
 
                 FACTORY_POOLS_DATA[pool.id] = {
-                    name: pool.name.split(": ")[1].trim(),
+                    name: getPoolName(pool.name),
                     full_name: pool.name,
                     symbol: pool.symbol,
                     reference_asset: "CRYPTO",
@@ -137,7 +138,7 @@ export async function getFactoryPoolsDataFromApi(this: ICurve, factoryType: IFac
                 };
             } else {
                 FACTORY_POOLS_DATA[pool.id] = {
-                    name: factoryType === "factory-tricrypto" ? pool.name : pool.name.split(": ")[1].trim(),
+                    name: factoryType === "factory-tricrypto" ? pool.name : getPoolName(pool.name),
                     full_name: pool.name,
                     symbol: pool.symbol,
                     reference_asset: "CRYPTO",
@@ -158,33 +159,24 @@ export async function getFactoryPoolsDataFromApi(this: ICurve, factoryType: IFac
                     in_api: true,
                 };
             }
-        } else if (pool.implementation.includes("meta")) {
+        } else if (pool.isMetaPool) {
             const implementationABIDict = FACTORY_CONSTANTS[this.chainId].implementationABIDict;
-            const implementationBasePoolIdDict = FACTORY_CONSTANTS[this.chainId].implementationBasePoolIdDict;
-            const basePoolIds = Object.values(implementationBasePoolIdDict).filter((poolId, i, arr) => arr.indexOf(poolId) === i);
             const allPoolsData = {...this.constants.POOLS_DATA, ...FACTORY_POOLS_DATA};
-            // @ts-ignore
-            const basePoolIdCoinsDict = Object.fromEntries(basePoolIds.map(
-                (poolId) => [poolId, allPoolsData[poolId]?.underlying_coins]));
-            // @ts-ignore
-            const basePoolIdCoinAddressesDict = Object.fromEntries(basePoolIds.map(
-                (poolId) => [poolId, allPoolsData[poolId]?.underlying_coin_addresses]));
-            // @ts-ignore
-            const basePoolIdDecimalsDict = Object.fromEntries(basePoolIds.map(
-                (poolId) => [poolId, allPoolsData[poolId]?.underlying_decimals]));
+            const basePoolId = getPoolIdByAddress(rawPoolList, pool.basePoolAddress as string);
+
+            const basePoolCoinNames = allPoolsData[basePoolId]?.underlying_coins;
+            const basePoolCoinAddresses = allPoolsData[basePoolId]?.underlying_coin_addresses;
+            const basePoolDecimals = allPoolsData[basePoolId]?.underlying_decimals;
+
             const basePoolIdZapDict = FACTORY_CONSTANTS[this.chainId].basePoolIdZapDict;
 
-            const basePoolId = implementationBasePoolIdDict[pool.implementationAddress];
-            const basePoolCoinNames = basePoolIdCoinsDict[basePoolId];
-            const basePoolCoinAddresses = basePoolIdCoinAddressesDict[basePoolId];
-            const basePoolDecimals = basePoolIdDecimalsDict[basePoolId];
             const basePoolZap = basePoolIdZapDict[basePoolId];
 
             FACTORY_POOLS_DATA[pool.id] = {
-                name: pool.name.split(": ")[1].trim(),
+                name: getPoolName(pool.name),
                 full_name: pool.name,
                 symbol: pool.symbol,
-                reference_asset: pool.assetTypeName.toUpperCase() as REFERENCE_ASSET,
+                reference_asset: assetTypeNameHandler(pool.assetTypeName),
                 swap_address: pool.address,
                 token_address: pool.address,
                 gauge_address: pool.gaugeAddress ? pool.gaugeAddress : curve.constants.ZERO_ADDRESS,
@@ -206,12 +198,11 @@ export async function getFactoryPoolsDataFromApi(this: ICurve, factoryType: IFac
             };
         } else {
             const implementationABIDict = FACTORY_CONSTANTS[this.chainId].implementationABIDict;
-
             FACTORY_POOLS_DATA[pool.id] = {
-                name: pool.name.split(": ")[1].trim(),
+                name: getPoolName(pool.name),
                 full_name: pool.name,
                 symbol: pool.symbol,
-                reference_asset: pool.assetTypeName.toUpperCase() as REFERENCE_ASSET,
+                reference_asset: assetTypeNameHandler(pool.assetTypeName),
                 swap_address: pool.address,
                 token_address: pool.address,
                 gauge_address: pool.gaugeAddress ? pool.gaugeAddress : curve.constants.ZERO_ADDRESS,
