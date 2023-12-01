@@ -231,7 +231,7 @@ const _buildRouteGraph = memoize(async (curveObj = curve): Promise<IDict<IDict<I
     }
 
     const ALL_POOLS = Object.entries(curveObj.getPoolsData()).filter(([id, _]) => id !== "crveth") as [string, IPoolData][];
-    const amplificationCoefficientDict = await _getAmplificationCoefficientsFromApi();
+    const amplificationCoefficientDict = await _getAmplificationCoefficientsFromApi(curveObj);
     for (const [poolId, poolData] of ALL_POOLS) {
         const wrappedCoinAddresses = poolData.wrapped_coin_addresses.map((a: string) => a.toLowerCase());
         const underlyingCoinAddresses = poolData.underlying_coin_addresses.map((a: string) => a.toLowerCase());
@@ -255,7 +255,7 @@ const _buildRouteGraph = memoize(async (curveObj = curve): Promise<IDict<IDict<I
         const metaCoinAddresses = basePool ? basePool.underlying_coin_addresses.map((a: string) => a.toLowerCase()) : [];
         let swapAddress = poolData.is_fake ? poolData.deposit_address?.toLowerCase() as string : poolAddress;
 
-        const tvl = (await _getTVL(poolId)) * tvlMultiplier;
+        const tvl = (await _getTVL(poolId, curveObj)) * tvlMultiplier;
         // Skip empty pools
         if (curveObj.chainId === 1 && tvl < 1000) continue;
         if (curveObj.chainId !== 1 && tvl < 100) continue;
@@ -546,7 +546,7 @@ export const _getBestRoute = memoize(
         const _amount = parseUnits(amount, inputCoinDecimals);
         if (_amount === curveObj.parseUnits("0")) return [];
 
-        const routesRaw: IRouteOutputAndCost[] = (await _findRoutes(inputCoinAddress, outputCoinAddress)).map(
+        const routesRaw: IRouteOutputAndCost[] = (await _findRoutes(inputCoinAddress, outputCoinAddress, curveObj)).map(
             (route) => ({ route, _output: curveObj.parseUnits("0"), outputUsd: 0, txCostUsd: 0 })
         );
         const routes: IRouteOutputAndCost[] = [];

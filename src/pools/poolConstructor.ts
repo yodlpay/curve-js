@@ -59,7 +59,7 @@ export const getPool = (poolId: string, curveObj = curve): PoolTemplate => {
         }
     } else if (poolDummy.zap && poolId !== 'susd') {
         Object.assign(Pool.prototype, depositZapMixin);
-    } else if (getCountArgsOfMethodByContract(curve.contracts[poolDummy.address].contract, 'add_liquidity') > 2) {
+    } else if (getCountArgsOfMethodByContract(curveObj.contracts[poolDummy.address].contract, 'add_liquidity') > 2) {
         Object.assign(Pool.prototype, depositLendingOrCryptoMixin);
     } else {
         Object.assign(Pool.prototype, depositPlainMixin);
@@ -92,7 +92,7 @@ export const getPool = (poolId: string, curveObj = curve): PoolTemplate => {
         }
     } else if (poolDummy.zap && poolId !== 'susd') {
         Object.assign(Pool.prototype, withdrawZapMixin);
-    } else if (getCountArgsOfMethodByContract(curve.contracts[poolDummy.address].contract, 'remove_liquidity') > 2) {
+    } else if (getCountArgsOfMethodByContract(curveObj.contracts[poolDummy.address].contract, 'remove_liquidity') > 2) {
         Object.assign(Pool.prototype, withdrawLendingOrCryptoMixin);
     } else {
         Object.assign(Pool.prototype, withdrawPlainMixin);
@@ -151,7 +151,7 @@ export const getPool = (poolId: string, curveObj = curve): PoolTemplate => {
         }
     } else if (poolDummy.zap) { // including susd
         Object.assign(Pool.prototype, withdrawOneCoinZapMixin);
-    } else if (getCountArgsOfMethodByContract(curve.contracts[poolDummy.address].contract, 'remove_liquidity_one_coin') > 3) {
+    } else if (getCountArgsOfMethodByContract(curveObj.contracts[poolDummy.address].contract, 'remove_liquidity_one_coin') > 3) {
         Object.assign(Pool.prototype, withdrawOneCoinLendingOrCryptoMixin);
     } else {
         Object.assign(Pool.prototype, withdrawOneCoinPlainMixin);
@@ -177,7 +177,7 @@ export const getPool = (poolId: string, curveObj = curve): PoolTemplate => {
 
     // swap and swapEstimateGas
     if ('exchange(uint256,uint256,uint256,uint256,bool)' in curveObj.contracts[poolDummy.address].contract &&
-        !(curve.chainId === 100 && poolDummy.id === "tricrypto")) { // tricrypto2 (eth), tricrypto (arbitrum), avaxcrypto (avalanche); 100 is xDAI
+        !(curveObj.chainId === 100 && poolDummy.id === "tricrypto")) { // tricrypto2 (eth), tricrypto (arbitrum), avaxcrypto (avalanche); 100 is xDAI
         Object.assign(Pool.prototype, swapTricrypto2Mixin);
     } else if (poolDummy.isMetaFactory && (getPool(poolDummy.basePool, curveObj).isLending || getPool(poolDummy.basePool, curveObj).isFake || poolDummy.isCrypto)) {
         if (poolDummy.isCrypto) {
