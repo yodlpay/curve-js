@@ -19,9 +19,9 @@ import {
     swapEstimateGas,
     swap,
     getSwappedAmount,
-    findAllRoutes,
-    getBestRoute,
-    getOutputForRoute,
+    _getBestRoute,
+    _getOutputForRoute,
+    _findRoutes,
     swapPriceImpactFromRoute,
 } from "./router.js";
 import { curve as _curve, Curve, NETWORK_CONSTANTS } from "./curve.js";
@@ -277,10 +277,10 @@ const curve = {
 }
 
 const router =  {
-    findAllRoutes,
-    getBestRoute,
+    findAllRoutes: _findRoutes,
+    getBestRoute: _getBestRoute,
     getBestRouteAndOutput,
-    getOutputForRoute,
+    getOutputForRoute: _getOutputForRoute,
     expected: swapExpected,
     priceImpact: swapPriceImpact,
     priceImpactFromRoute: swapPriceImpactFromRoute,

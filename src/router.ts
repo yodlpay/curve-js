@@ -399,7 +399,7 @@ const _isVisitedPool = (poolId: string, route: IRouteTvl): boolean => {
 }
 
 // Breadth-first search
-const _findRoutes = async (inputCoinAddress: string, outputCoinAddress: string, curveObj = curve): Promise<IRoute[]>  => {
+export const _findRoutes = async (inputCoinAddress: string, outputCoinAddress: string, curveObj = curve): Promise<IRoute[]>  => {
     inputCoinAddress = inputCoinAddress.toLowerCase();
     outputCoinAddress = outputCoinAddress.toLowerCase();
 
@@ -642,7 +642,7 @@ export const _getBestRoute = memoize(
     }
 )
 
-const _getOutputForRoute = memoize(
+export const _getOutputForRoute = memoize(
     async (route: IRoute, _amount: bigint, curveObj = curve): Promise<bigint> => {
         const contract = curveObj.contracts[curveObj.constants.ALIASES.router].contract;
         const { _route, _swapParams, _pools } = _getExchangeArgs(route);
@@ -705,10 +705,9 @@ export const swapRequired = async (inputCoin: string, outputCoin: string, outAmo
     return curveObj.formatUnits(_required, inputCoinDecimals)
 }
 
-export const swapPriceImpact = async (inputCoin: string, outputCoin: string, amount: number | string, curveObj = curve): Promise<number> => {
+export const swapPriceImpactFromRoute = async (amount: number | string, route: IRoute, output: string, inputCoin: string, outputCoin: string, curveObj = curve): Promise<number> => {
     const [inputCoinAddress, outputCoinAddress] = _getCoinAddresses(curveObj, inputCoin, outputCoin);
     const [inputCoinDecimals, outputCoinDecimals] = _getCoinDecimals(curveObj, inputCoinAddress, outputCoinAddress);
-    const { route, output } = await getBestRouteAndOutput(inputCoinAddress, outputCoinAddress, amount);
     const _amount = parseUnits(amount, inputCoinDecimals);
     const _output = parseUnits(output, outputCoinDecimals);
 
@@ -729,6 +728,12 @@ export const swapPriceImpact = async (inputCoin: string, outputCoin: string, amo
     const priceImpactBN = _get_price_impact(_amount, _output, _smallAmount, _smallOutput, inputCoinDecimals, outputCoinDecimals);
 
     return Number(_cutZeros(priceImpactBN.toFixed(4)))
+}
+
+export const swapPriceImpact = async (inputCoin: string, outputCoin: string, amount: number | string, curveObj = curve): Promise<number> => {
+    const [inputCoinAddress, outputCoinAddress] = _getCoinAddresses(curveObj, inputCoin, outputCoin);
+    const { route, output } = await getBestRouteAndOutput(inputCoinAddress, outputCoinAddress, amount);
+    return await swapPriceImpactFromRoute(amount, route, output, inputCoin, outputCoin, curveObj);
 }
 
 export const swapIsApproved = async (inputCoin: string, amount: number | string): Promise<boolean> => {
