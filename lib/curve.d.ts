@@ -52,6 +52,7 @@ export declare class Curve implements ICurve {
         EYWA_FACTORY_POOLS_DATA: IDict<IPoolData>;
         CRYPTO_FACTORY_POOLS_DATA: IDict<IPoolData>;
         TRICRYPTO_FACTORY_POOLS_DATA: IDict<IPoolData>;
+        STABLE_NG_FACTORY_POOLS_DATA: IDict<IPoolData>;
         LLAMMAS_DATA: IDict<IPoolData>;
         COINS: IDict<string>;
         DECIMALS: IDict<number>;
@@ -83,6 +84,7 @@ export declare class Curve implements ICurve {
     fetchEywaFactoryPools: (useApi?: boolean) => Promise<void>;
     fetchCryptoFactoryPools: (useApi?: boolean) => Promise<void>;
     fetchTricryptoFactoryPools: (useApi?: boolean) => Promise<void>;
+    fetchStableNgFactoryPools: (useApi?: boolean) => Promise<void>;
     fetchNewFactoryPools: () => Promise<string[]>;
     fetchNewCryptoFactoryPools: () => Promise<string[]>;
     fetchNewTricryptoFactoryPools: () => Promise<string[]>;
@@ -95,6 +97,7 @@ export declare class Curve implements ICurve {
     getEywaFactoryPoolList: () => string[];
     getCryptoFactoryPoolList: () => string[];
     getTricryptoFactoryPoolList: () => string[];
+    getStableNgFactoryPoolList: () => string[];
     getPoolList: () => string[];
     getPoolsData: () => IDict<IPoolData>;
     getGaugeImplementation: (factoryType: IFactoryPoolType) => string;

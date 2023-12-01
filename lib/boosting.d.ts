@@ -10,7 +10,7 @@ export declare const getLockedAmountAndUnlockTime: (...addresses: string[] | str
 export declare const getVeCrv: (...addresses: string[] | string[][]) => Promise<IDict<string> | string>;
 export declare const getVeCrvPct: (...addresses: string[] | string[][]) => Promise<IDict<string> | string>;
 export declare const isApproved: (amount: number | string) => Promise<boolean>;
-export declare const approveEstimateGas: (amount: number | string) => Promise<number>;
+export declare const approveEstimateGas: (amount: number | string) => Promise<number | number[]>;
 export declare const approve: (amount: number | string) => Promise<string[]>;
 export declare const createLockEstimateGas: (amount: number | string, days: number) => Promise<number>;
 export declare const calcUnlockTime: (days: number, start?: number) => number;

@@ -16,4 +16,10 @@ export declare const deployTricryptoPool: (name: string, symbol: string, coins: 
 export declare const getDeployedTricryptoPoolAddress: (tx: ethers.ContractTransactionResponse) => Promise<string>;
 export declare const deployGaugeEstimateGas: (pool: string, factory: string) => Promise<number>;
 export declare const deployGauge: (pool: string, factory: string) => Promise<ethers.ContractTransactionResponse>;
+export declare const deployGaugeSidechainEstimateGas: (pool: string, salt: string) => Promise<number>;
+export declare const deployGaugeSidechain: (pool: string, salt: string) => Promise<ethers.ContractTransactionResponse>;
+export declare const deployGaugeMirrorEstimateGas: (chainId: number, salt: string) => Promise<number>;
+export declare const deployGaugeMirror: (chainId: number, salt: string) => Promise<ethers.ContractTransactionResponse>;
 export declare const getDeployedGaugeAddress: (tx: ethers.ContractTransactionResponse) => Promise<string>;
+export declare const getDeployedGaugeMirrorAddressByTx: (tx: ethers.ContractTransactionResponse) => Promise<string>;
+export declare const getDeployedGaugeMirrorAddress: (chainId: number) => Promise<string>;

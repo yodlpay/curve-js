@@ -11,18 +11,7 @@ export declare const implementationABIDictKava: IDict<any>;
 export declare const implementationABIDictCelo: IDict<any>;
 export declare const implementationABIDictZkSync: IDict<any>;
 export declare const implementationABIDictBase: IDict<any>;
-export declare const implementationBasePoolIdDictEthereum: IDict<string>;
-export declare const implementationBasePoolIdDictPolygon: IDict<string>;
-export declare const implementationBasePoolIdDictFantom: IDict<string>;
-export declare const implementationBasePoolIdDictAvalanche: IDict<string>;
-export declare const implementationBasePoolIdDictArbitrum: IDict<string>;
-export declare const implementationBasePoolIdDictOptimism: IDict<string>;
-export declare const implementationBasePoolIdDictXDai: IDict<string>;
-export declare const implementationBasePoolIdDictMoonbeam: IDict<string>;
-export declare const implementationBasePoolIdDictKava: IDict<string>;
-export declare const implementationBasePoolIdDictCelo: IDict<string>;
-export declare const implementationBasePoolIdDictZkSync: IDict<string>;
-export declare const implementationBasePoolIdDictBase: IDict<string>;
+export declare const implementationABIDictBsc: IDict<any>;
 export declare const basePoolIdZapDictEthereum: IDict<{
     address: string;
     ABI: any;
@@ -71,10 +60,13 @@ export declare const basePoolIdZapDictBase: IDict<{
     address: string;
     ABI: any;
 }>;
+export declare const basePoolIdZapDictBsc: IDict<{
+    address: string;
+    ABI: any;
+}>;
 export declare const FACTORY_CONSTANTS: {
     [index: number]: {
         implementationABIDict: IDict<any>;
-        implementationBasePoolIdDict: IDict<string>;
         basePoolIdZapDict: IDict<{
             address: string;
             ABI: any;

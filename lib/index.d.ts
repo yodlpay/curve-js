@@ -42,6 +42,8 @@ declare const curve: {
     PoolTemplate: typeof PoolTemplate;
     getPool: (poolId: string, curveObj?: Curve) => PoolTemplate;
     getUsdRate: (curveObj: Curve | undefined, coin: string) => Promise<number>;
+    getGasPriceFromL1: () => Promise<number>;
+    getGasPriceFromL2: () => Promise<number>;
     getTVL: (network?: import("./interfaces.js").INetworkName | import("./interfaces.js").IChainId) => Promise<number>;
     getBalances: (coins: string[], ...addresses: string[] | string[][]) => Promise<string[] | import("./interfaces.js").IDict<string[]>>;
     getAllowance: (coins: string[], address: string, spender: string, curveObj?: Curve) => Promise<string[]>;
@@ -57,6 +59,8 @@ declare const curve: {
         cryptoVolume: number;
         cryptoShare: number;
     }>;
+    hasDepositAndStake: () => boolean;
+    hasRouter: () => boolean;
     factory: {
         fetchPools: (useApi?: boolean) => Promise<void>;
         fetchNewPools: () => Promise<string[]>;
@@ -65,9 +69,13 @@ declare const curve: {
         setOracle: (poolAddress: string, oracleAddress?: string, methodName?: string) => Promise<ethers.ContractTransactionResponse>;
         deployMetaPool: (basePool: string, name: string, symbol: string, coin: string, A: string | number, fee: string | number, implementationIdx: 0 | 1) => Promise<ethers.ContractTransactionResponse>;
         deployGauge: (poolAddress: string) => Promise<ethers.ContractTransactionResponse>;
+        deployGaugeSidechain: (poolAddress: string, salt: string) => Promise<ethers.ContractTransactionResponse>;
+        deployGaugeMirror: (chainId: number, salt: string) => Promise<ethers.ContractTransactionResponse>;
         getDeployedPlainPoolAddress: (tx: ethers.ContractTransactionResponse) => Promise<string>;
         getDeployedMetaPoolAddress: (tx: ethers.ContractTransactionResponse) => Promise<string>;
         getDeployedGaugeAddress: (tx: ethers.ContractTransactionResponse) => Promise<string>;
+        getDeployedGaugeMirrorAddress: (chainId: number) => Promise<string>;
+        getDeployedGaugeMirrorAddressByTx: (tx: ethers.ContractTransactionResponse) => Promise<string>;
         fetchRecentlyDeployedPool: (poolAddress: string) => Promise<string>;
         gaugeImplementation: () => string;
         estimateGas: {
@@ -75,6 +83,8 @@ declare const curve: {
             setOracle: (poolAddress: string, oracleAddress?: string, methodName?: string) => Promise<number>;
             deployMetaPool: (basePool: string, name: string, symbol: string, coin: string, A: string | number, fee: string | number, implementationIdx: 0 | 1) => Promise<number>;
             deployGauge: (poolAddress: string) => Promise<number>;
+            deployGaugeSidechain: (poolAddress: string, salt: string) => Promise<number>;
+            deployGaugeMirror: (chainId: number, salt: string) => Promise<number>;
         };
     };
     crvUSDFactory: {
@@ -85,19 +95,29 @@ declare const curve: {
         fetchPools: (useApi?: boolean) => Promise<void>;
         getPoolList: () => string[];
     };
+    stableNgFactory: {
+        fetchPools: (useApi?: boolean) => Promise<void>;
+        getPoolList: () => string[];
+    };
     cryptoFactory: {
         fetchPools: (useApi?: boolean) => Promise<void>;
         fetchNewPools: () => Promise<string[]>;
         getPoolList: () => string[];
         deployPool: (name: string, symbol: string, coins: string[], A: string | number, gamma: string | number, midFee: string | number, outFee: string | number, allowedExtraProfit: string | number, feeGamma: string | number, adjustmentStep: string | number, maHalfTime: number, initialPrice: string | number) => Promise<ethers.ContractTransactionResponse>;
         deployGauge: (poolAddress: string) => Promise<ethers.ContractTransactionResponse>;
+        deployGaugeSidechain: (poolAddress: string, salt: string) => Promise<ethers.ContractTransactionResponse>;
+        deployGaugeMirror: (chainId: number, salt: string) => Promise<ethers.ContractTransactionResponse>;
         getDeployedPoolAddress: (tx: ethers.ContractTransactionResponse) => Promise<string>;
         getDeployedGaugeAddress: (tx: ethers.ContractTransactionResponse) => Promise<string>;
+        getDeployedGaugeMirrorAddress: (chainId: number) => Promise<string>;
+        getDeployedGaugeMirrorAddressByTx: (tx: ethers.ContractTransactionResponse) => Promise<string>;
         fetchRecentlyDeployedPool: (poolAddress: string) => Promise<string>;
         gaugeImplementation: () => string;
         estimateGas: {
             deployPool: (name: string, symbol: string, coins: string[], A: string | number, gamma: string | number, midFee: string | number, outFee: string | number, allowedExtraProfit: string | number, feeGamma: string | number, adjustmentStep: string | number, maHalfTime: number, initialPrice: string | number) => Promise<number>;
             deployGauge: (poolAddress: string) => Promise<number>;
+            deployGaugeSidechain: (poolAddress: string, salt: string) => Promise<number>;
+            deployGaugeMirror: (chainId: number, salt: string) => Promise<number>;
         };
     };
     tricryptoFactory: {
@@ -106,17 +126,23 @@ declare const curve: {
         getPoolList: () => string[];
         deployPool: (name: string, symbol: string, coins: string[], A: string | number, gamma: string | number, midFee: string | number, outFee: string | number, allowedExtraProfit: string | number, feeGamma: string | number, adjustmentStep: string | number, emaTime: number, initialPrices: (string | number)[]) => Promise<ethers.ContractTransactionResponse>;
         deployGauge: (poolAddress: string) => Promise<ethers.ContractTransactionResponse>;
+        deployGaugeSidechain: (poolAddress: string, salt: string) => Promise<ethers.ContractTransactionResponse>;
+        deployGaugeMirror: (chainId: number, salt: string) => Promise<ethers.ContractTransactionResponse>;
         getDeployedPoolAddress: (tx: ethers.ContractTransactionResponse) => Promise<string>;
         getDeployedGaugeAddress: (tx: ethers.ContractTransactionResponse) => Promise<string>;
+        getDeployedGaugeMirrorAddress: (chainId: number) => Promise<string>;
+        getDeployedGaugeMirrorAddressByTx: (tx: ethers.ContractTransactionResponse) => Promise<string>;
         fetchRecentlyDeployedPool: (poolAddress: string) => Promise<string>;
         gaugeImplementation: () => string;
         estimateGas: {
             deployPool: (name: string, symbol: string, coins: string[], A: string | number, gamma: string | number, midFee: string | number, outFee: string | number, allowedExtraProfit: string | number, feeGamma: string | number, adjustmentStep: string | number, emaTime: number, initialPrices: (string | number)[]) => Promise<number>;
             deployGauge: (poolAddress: string) => Promise<number>;
+            deployGaugeSidechain: (poolAddress: string, salt: string) => Promise<number>;
+            deployGaugeMirror: (chainId: number, salt: string) => Promise<number>;
         };
     };
     estimateGas: {
-        ensureAllowance: (coins: string[], amounts: (string | number)[], spender: string, isMax?: boolean, curveObj?: Curve) => Promise<number>;
+        ensureAllowance: (coins: string[], amounts: (string | number)[], spender: string, isMax?: boolean, curveObj?: Curve) => Promise<number | number[]>;
     };
     boosting: {
         getCrv: (...addresses: string[] | string[][]) => Promise<string | import("./interfaces.js").IDict<string>>;
@@ -139,7 +165,7 @@ declare const curve: {
         claimableFees: (address?: string) => Promise<string>;
         claimFees: (address?: string) => Promise<string>;
         estimateGas: {
-            approve: (amount: string | number) => Promise<number>;
+            approve: (amount: string | number) => Promise<number | number[]>;
             createLock: (amount: string | number, days: number) => Promise<number>;
             increaseAmount: (amount: string | number) => Promise<number>;
             increaseUnlockTime: (days: number) => Promise<number>;
@@ -166,20 +192,30 @@ declare const curve: {
             route: import("./interfaces.js").IRoute;
             output: string;
         }>;
+        getArgs: (route: import("./interfaces.js").IRoute) => {
+            _route: string[];
+            _swapParams: number[][];
+            _pools: string[];
+            _basePools: string[];
+            _baseTokens: string[];
+            _secondBasePools: string[];
+            _secondBaseTokens: string[];
+        };
         expected: (inputCoin: string, outputCoin: string, amount: string | number, curveObj?: Curve) => Promise<string>;
+        required: (inputCoin: string, outputCoin: string, outAmount: string | number, curveObj?: Curve) => Promise<string>;
         priceImpact: (inputCoin: string, outputCoin: string, amount: string | number, curveObj?: Curve) => Promise<number>;
         isApproved: (inputCoin: string, amount: string | number) => Promise<boolean>;
         approve: (inputCoin: string, amount: string | number) => Promise<string[]>;
         swap: (inputCoin: string, outputCoin: string, amount: string | number, slippage?: number, curveObj?: Curve) => Promise<ethers.ContractTransactionResponse>;
         getSwappedAmount: (tx: ethers.ContractTransactionResponse, outputCoin: string, curveObj?: Curve) => Promise<string>;
         estimateGas: {
-            approve: (inputCoin: string, amount: string | number) => Promise<number>;
-            swap: (inputCoin: string, outputCoin: string, amount: string | number, curveObj?: Curve) => Promise<number>;
+            approve: (inputCoin: string, amount: string | number) => Promise<number | number[]>;
+            swap: (inputCoin: string, outputCoin: string, amount: string | number, curveObj?: Curve) => Promise<number | number[]>;
         };
     };
 };
 declare const router: {
-    findAllRoutes: ((inputCoinAddress: string, outputCoinAddress: string, curveObj?: any) => Promise<import("./interfaces.js").IRoute[]>) & import("memoizee").Memoized<(inputCoinAddress: string, outputCoinAddress: string, curveObj?: any) => Promise<import("./interfaces.js").IRoute[]>>;
+    findAllRoutes: (inputCoinAddress: string, outputCoinAddress: string, curveObj?: Curve) => Promise<import("./interfaces.js").IRoute[]>;
     getBestRoute: ((inputCoinAddress: string, outputCoinAddress: string, amount: string | number, curveObj?: any) => Promise<import("./interfaces.js").IRoute>) & import("memoizee").Memoized<(inputCoinAddress: string, outputCoinAddress: string, amount: string | number, curveObj?: any) => Promise<import("./interfaces.js").IRoute>>;
     getBestRouteAndOutput: (inputCoin: string, outputCoin: string, amount: string | number, curveObj?: Curve) => Promise<{
         route: import("./interfaces.js").IRoute;
@@ -194,8 +230,8 @@ declare const router: {
     swap: (inputCoin: string, outputCoin: string, amount: string | number, slippage?: number, curveObj?: Curve) => Promise<ethers.ContractTransactionResponse>;
     getSwappedAmount: (tx: ethers.ContractTransactionResponse, outputCoin: string, curveObj?: Curve) => Promise<string>;
     estimateGas: {
-        approve: (inputCoin: string, amount: string | number) => Promise<number>;
-        swap: (inputCoin: string, outputCoin: string, amount: string | number, curveObj?: Curve) => Promise<number>;
+        approve: (inputCoin: string, amount: string | number) => Promise<number | number[]>;
+        swap: (inputCoin: string, outputCoin: string, amount: string | number, curveObj?: Curve) => Promise<number | number[]>;
     };
 };
 export { curve, Curve, NETWORK_CONSTANTS, router };

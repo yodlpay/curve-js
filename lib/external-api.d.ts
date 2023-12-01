@@ -38,9 +38,11 @@ export declare const _getFactoryAPYsAndVolumes: ((network: string) => Promise<{
 export declare const _getAllGauges: (() => Promise<IDict<{
     gauge: string;
     is_killed?: boolean;
+    gaugeStatus?: Record<string, boolean> | null;
 }>>) & memoize.Memoized<() => Promise<IDict<{
     gauge: string;
     is_killed?: boolean;
+    gaugeStatus?: Record<string, boolean> | null;
 }>>>;
 export declare const _getHiddenPools: (() => Promise<IDict<string[]>>) & memoize.Memoized<() => Promise<IDict<string[]>>>;
 export declare const _generateBoostingProof: ((block: number, address: string) => Promise<{

@@ -1,5 +1,6 @@
+import { Contract } from 'ethers';
 import BigNumber from 'bignumber.js';
-import { IChainId, IDict, INetworkName, IRewardFromApi } from './interfaces';
+import { IChainId, IDict, INetworkName, IRewardFromApi, REFERENCE_ASSET } from './interfaces';
 export declare const ETH_ADDRESS = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
 export declare const MAX_ALLOWANCE: bigint;
 export declare const _cutZeros: (strn: string) => string;
@@ -13,6 +14,10 @@ export declare const fromBN: (bn: BigNumber, decimals?: number) => bigint;
 export declare const isEth: (address: string) => boolean;
 export declare const getEthIndex: (addresses: string[]) => number;
 export declare const mulBy1_3: (n: bigint) => bigint;
+export declare const smartNumber: (abstractNumber: bigint | bigint[]) => number | number[];
+export declare const DIGas: (gas: bigint | Array<bigint>) => bigint;
+export declare const getGasFromArray: (gas: number[]) => number | number[];
+export declare const gasSum: (gas: number[], currentGas: number | number[]) => number[];
 export declare const _getCoinAddressesNoCheck: (curveObj?: import("./curve.js").Curve, ...coins: string[] | string[][]) => string[];
 export declare const _getCoinAddresses: (curveObj?: import("./curve.js").Curve, ...coins: string[] | string[][]) => string[];
 export declare const _getCoinDecimals: (curveObj?: import("./curve.js").Curve, ...coinAddresses: string[] | string[][]) => number[];
@@ -23,7 +28,7 @@ export declare const _getAllowance: (coins: string[], address: string, spender: 
 export declare const getAllowance: (coins: string[], address: string, spender: string, curveObj?: import("./curve.js").Curve) => Promise<string[]>;
 export declare const hasAllowance: (coins: string[], amounts: (number | string)[], address: string, spender: string, curveObj?: import("./curve.js").Curve) => Promise<boolean>;
 export declare const _ensureAllowance: (coins: string[], amounts: bigint[], spender: string, isMax?: boolean, curveObj?: import("./curve.js").Curve) => Promise<string[]>;
-export declare const ensureAllowanceEstimateGas: (coins: string[], amounts: (number | string)[], spender: string, isMax?: boolean, curveObj?: import("./curve.js").Curve) => Promise<number>;
+export declare const ensureAllowanceEstimateGas: (coins: string[], amounts: (number | string)[], spender: string, isMax?: boolean, curveObj?: import("./curve.js").Curve) => Promise<number | number[]>;
 export declare const ensureAllowance: (coins: string[], amounts: (number | string)[], spender: string, isMax?: boolean, curveObj?: import("./curve.js").Curve) => Promise<string[]>;
 export declare const getPoolIdBySwapAddress: (swapAddress: string) => string;
 export declare const _getUsdPricesFromApi: () => Promise<IDict<number>>;
@@ -31,6 +36,9 @@ export declare const _getCrvApyFromApi: () => Promise<IDict<[number, number]>>;
 export declare const _getRewardsFromApi: () => Promise<IDict<IRewardFromApi[]>>;
 export declare const _getUsdRate: (assetId: string, curveObj?: import("./curve.js").Curve) => Promise<number>;
 export declare const getUsdRate: (curveObj: import("./curve.js").Curve | undefined, coin: string) => Promise<number>;
+export declare const getGasPriceFromL1: () => Promise<number>;
+export declare const getGasPriceFromL2: () => Promise<number>;
+export declare const getTxCostsUsd: (ethUsdRate: number, gasPrice: number, gas: number | number[], gasPriceL1?: number) => number;
 export declare const getTVL: (network?: INetworkName | IChainId) => Promise<number>;
 export declare const getVolume: (network?: INetworkName | IChainId) => Promise<{
     totalVolume: number;
@@ -45,3 +53,8 @@ export declare const getCoinsData: (curveObj?: import("./curve.js").Curve, ...co
     symbol: string;
     decimals: number;
 }[]>;
+export declare const hasDepositAndStake: () => boolean;
+export declare const hasRouter: () => boolean;
+export declare const getCountArgsOfMethodByContract: (contract: Contract, methodName: string) => number;
+export declare const getPoolName: (name: string) => string;
+export declare const assetTypeNameHandler: (assetTypeName: string) => REFERENCE_ASSET;
