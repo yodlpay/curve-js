@@ -30,7 +30,7 @@ export declare const hasAllowance: (coins: string[], amounts: (number | string)[
 export declare const _ensureAllowance: (coins: string[], amounts: bigint[], spender: string, isMax?: boolean, curveObj?: import("./curve.js").Curve) => Promise<string[]>;
 export declare const ensureAllowanceEstimateGas: (coins: string[], amounts: (number | string)[], spender: string, isMax?: boolean, curveObj?: import("./curve.js").Curve) => Promise<number | number[]>;
 export declare const ensureAllowance: (coins: string[], amounts: (number | string)[], spender: string, isMax?: boolean, curveObj?: import("./curve.js").Curve) => Promise<string[]>;
-export declare const getPoolIdBySwapAddress: (swapAddress: string) => string;
+export declare const getPoolIdBySwapAddress: (swapAddress: string, curveObj?: import("./curve.js").Curve) => string;
 export declare const _getUsdPricesFromApi: () => Promise<IDict<number>>;
 export declare const _getCrvApyFromApi: () => Promise<IDict<[number, number]>>;
 export declare const _getRewardsFromApi: () => Promise<IDict<IRewardFromApi[]>>;

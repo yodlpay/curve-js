@@ -72,7 +72,7 @@ declare const curve: {
         deployGaugeSidechain: (poolAddress: string, salt: string) => Promise<ethers.ContractTransactionResponse>;
         deployGaugeMirror: (chainId: number, salt: string) => Promise<ethers.ContractTransactionResponse>;
         getDeployedPlainPoolAddress: (tx: ethers.ContractTransactionResponse) => Promise<string>;
-        getDeployedMetaPoolAddress: (tx: ethers.ContractTransactionResponse) => Promise<string>;
+        getDeployedMetaPoolAddress: (tx: ethers.ContractTransactionResponse, curveObj?: Curve) => Promise<string>;
         getDeployedGaugeAddress: (tx: ethers.ContractTransactionResponse) => Promise<string>;
         getDeployedGaugeMirrorAddress: (chainId: number) => Promise<string>;
         getDeployedGaugeMirrorAddressByTx: (tx: ethers.ContractTransactionResponse) => Promise<string>;

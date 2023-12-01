@@ -7,7 +7,7 @@ export declare const setOracleEstimateGas: (poolAddress: string, oracleAddress?:
 export declare const setOracle: (poolAddress: string, oracleAddress?: string, methodName?: string) => Promise<ethers.ContractTransactionResponse>;
 export declare const deployStableMetaPoolEstimateGas: (basePool: string, name: string, symbol: string, coin: string, A: number | string, fee: number | string, implementationIdx: 0 | 1) => Promise<number>;
 export declare const deployStableMetaPool: (basePool: string, name: string, symbol: string, coin: string, A: number | string, fee: number | string, implementationIdx: 0 | 1) => Promise<ethers.ContractTransactionResponse>;
-export declare const getDeployedStableMetaPoolAddress: (tx: ethers.ContractTransactionResponse) => Promise<string>;
+export declare const getDeployedStableMetaPoolAddress: (tx: ethers.ContractTransactionResponse, curveObj?: import("../curve.js").Curve) => Promise<string>;
 export declare const deployCryptoPoolEstimateGas: (name: string, symbol: string, coins: string[], A: number | string, gamma: number | string, midFee: number | string, outFee: number | string, allowedExtraProfit: number | string, feeGamma: number | string, adjustmentStep: number | string, maHalfTime: number, initialPrice: number | string) => Promise<number>;
 export declare const deployCryptoPool: (name: string, symbol: string, coins: string[], A: number | string, gamma: number | string, midFee: number | string, outFee: number | string, allowedExtraProfit: number | string, feeGamma: number | string, adjustmentStep: number | string, maHalfTime: number, initialPrice: number | string) => Promise<ethers.ContractTransactionResponse>;
 export declare const getDeployedCryptoPoolAddress: (tx: ethers.ContractTransactionResponse) => Promise<string>;
