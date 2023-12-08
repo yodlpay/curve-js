@@ -416,7 +416,7 @@ export const _findRoutes = async (inputCoinAddress: string, outputCoinAddress: s
 
         if (inCoin === outputCoinAddress) {
             targetRoutes.push(route);
-        } else if (route.route.length < 5) {
+        } else if (route.route.length < 3) {
             for (const outCoin in routerGraph[inCoin]) {
                 if (_isVisitedCoin(outCoin, route)) continue;
 
