@@ -20,7 +20,7 @@ import {
     swap,
     getSwappedAmount,
 } from "./router.js";
-import { curve as _curve } from "./curve.js";
+import { curve as _curve, Curve, NETWORK_CONSTANTS } from "./curve.js";
 import {
     getCrv,
     getLockedAmountAndUnlockTime,
@@ -415,4 +415,5 @@ const curve = {
     },
 }
 
-export default curve;
+
+export { curve, Curve, NETWORK_CONSTANTS };

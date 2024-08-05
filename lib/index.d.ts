@@ -1,5 +1,6 @@
 import { ethers, Networkish } from "ethers";
 import { PoolTemplate } from "./pools/index.js";
+import { Curve, NETWORK_CONSTANTS } from "./curve.js";
 declare function init(providerType: 'JsonRpc' | 'Web3' | 'Infura' | 'Alchemy', providerSettings: {
     url?: string;
     privateKey?: string;
@@ -305,4 +306,4 @@ declare const curve: {
         };
     };
 };
-export default curve;
+export { curve, Curve, NETWORK_CONSTANTS };
