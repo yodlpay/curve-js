@@ -228,7 +228,7 @@ export async function getFactoryPoolsDataFromApi(this: ICurve, factoryType: IFac
             if(isStableNgPool(basePoolId)) {
                 this.setContract(FACTORY_CONSTANTS[this.chainId].stableNgBasePoolZap.address, FACTORY_CONSTANTS[this.chainId].stableNgBasePoolZap.ABI);
             }
-
+            if (basePoolId !== '') {
             FACTORY_POOLS_DATA[pool.id] = {
                 name: getPoolName(pool.name),
                 full_name: pool.name,
@@ -254,6 +254,7 @@ export async function getFactoryPoolsDataFromApi(this: ICurve, factoryType: IFac
                 in_api: true,
                 is_ng: factoryType === 'factory-stable-ng',
             };
+            }
         } else {
             const implementationABIDict = FACTORY_CONSTANTS[this.chainId].implementationABIDict;
             FACTORY_POOLS_DATA[pool.id] = {
