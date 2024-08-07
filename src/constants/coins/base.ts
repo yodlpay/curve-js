@@ -8,6 +8,7 @@ export const COINS_BASE: IDict<string> = lowerCaseValues({
     // --- ETH ---
     eth: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",  // ETH
     weth: '0x4200000000000000000000000000000000000006',
+    usdm: "0x59D9356E565Ab3A36dD77763Fc0d87fEaf85508C", // USDM
 });
 
 export const cTokensBase = []; //.map((a) => a.toLowerCase());
